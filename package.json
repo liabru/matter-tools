@@ -1,0 +1,36 @@
+{
+  "name": "MatterTools",
+  "version": "0.5.0",
+  "license": "MIT",
+  "homepage": "https://github.com/liabru/matter-tools",
+  "author": "Liam Brummitt <liam@brm.io> (http://brm.io/)",
+  "description": "tools for creating, testing and debugging matter.js worlds",
+  "main": "build/matter-tools.min.js",
+  "repository":{ 
+    "type" : "git", 
+    "url" : "https://github.com/liabru/matter-tools.git"
+  },
+  "keywords": [
+    "javascript",
+    "canvas",
+    "html5",
+    "physics",
+    "physics engine",
+    "game engine",
+    "rigid body physics"
+  ],
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-connect": "~0.6.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt-contrib-cssmin": "~0.9.0"
+  },
+  "scripts": {
+    "dev": "npm install && grunt dev",
+    "test": "grunt test"
+  }
+}
