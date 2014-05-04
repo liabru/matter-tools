@@ -40,6 +40,9 @@ var Engine = Matter.Engine,
     Vector = Matter.Vector,
     Vertices = Matter.Vertices,
     MouseConstraint = Matter.MouseConstraint,
+    Render = Matter.Render,
+    RenderPixi = Matter.RenderPixi,
+    Mouse = Matter.Mouse,
     Query = Matter.Query;
 
 // Begin Matter namespace closure

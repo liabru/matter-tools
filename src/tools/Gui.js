@@ -125,10 +125,6 @@ var Gui = {};
     Gui.serialise = function(serializer, object, indent) {
         indent = indent || 0;
         return serializer.stringify(object, function(key, value) {
-            // skip non-required values
-            if (key === 'path')
-                return undefined;
-
             // limit precision of floats
             if (!/^#/.exec(key) && typeof value === 'number') {
                 var fixed = parseFloat(value.toFixed(3));
