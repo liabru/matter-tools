@@ -37,7 +37,8 @@ var Gui = {};
             friction: 0.1,
             frictionAir: 0.01,
             offset: { x: 0, y: 0 },
-            renderer: 'canvas'
+            renderer: 'canvas',
+            chamfer: 0
         };
         
         if (Resurrect) {
@@ -185,6 +186,7 @@ var Gui = {};
         controls.add(gui, 'friction', 0, 1).step(0.05);
         controls.add(gui, 'frictionAir', 0, gui.frictionAir * 10).step(gui.frictionAir / 10);
         controls.add(gui, 'restitution', 0, 1).step(0.1);
+        controls.add(gui, 'chamfer', 0, 30).step(2);
         controls.add(funcs, 'addBody');
         controls.open();
 
@@ -271,6 +273,12 @@ var Gui = {};
             frictionAir: gui.frictionAir,
             restitution: gui.restitution
         };
+
+        if (gui.chamfer && gui.sides > 2) {
+            options.chamfer = {
+                radius: gui.chamfer
+            }
+        }
 
         for (var i = 0; i < gui.amount; i++) {
             World.add(engine.world, Bodies.polygon(gui.offset.x + 120 + i * gui.size + i * 50, gui.offset.y + 200, gui.sides, gui.size, options));
