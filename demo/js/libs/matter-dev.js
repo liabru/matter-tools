@@ -1,5 +1,5 @@
 /**
-* matter-dev.min.js 0.7.0-dev 2014-05-01
+* matter-dev.min.js 0.7.0-dev 2014-05-04
 * http://brm.io/matter-js/
 * License: MIT
 */
@@ -15,6 +15,7 @@
         type:"body",
         label:"Body",
         angle:0,
+        vertices:Vertices.fromPath("L 0 0 L 40 0 L 40 40 L 0 40"),
         position:{
           x:0,
           y:0
@@ -57,7 +58,6 @@
             xScale:1,
             yScale:1
           },
-          path:"L 0 0 L 40 0 L 40 40 L 0 40",
           lineWidth:1.5
         }
       };
@@ -69,7 +69,6 @@
       return _nextGroupId++;
     };
     var _initProperties = function(body) {
-      body.vertices = body.vertices || Vertices.fromPath(body.render.path);
       body.axes = body.axes || Axes.fromVertices(body.vertices);
       body.area = Vertices.area(body.vertices);
       body.bounds = Bounds.create(body.vertices);
@@ -127,17 +126,17 @@
         body.force.x += body.mass * gravity.x * .001;
       }
     };
-    Body.updateAll = function(bodies, deltaTime, correction, worldBounds) {
+    Body.updateAll = function(bodies, deltaTime, timeScale, correction, worldBounds) {
       for (var i = 0; i < bodies.length; i++) {
         var body = bodies[i];
         if (body.isStatic || body.isSleeping) continue;
         if (body.bounds.max.x < worldBounds.min.x || body.bounds.min.x > worldBounds.max.x || body.bounds.max.y < worldBounds.min.y || body.bounds.min.y > worldBounds.max.y) continue;
-        Body.update(body, deltaTime, correction);
+        Body.update(body, deltaTime, timeScale, correction);
       }
     };
-    Body.update = function(body, deltaTime, correction) {
-      var deltaTimeSquared = deltaTime * deltaTime * body.timeScale;
-      var frictionAir = 1 - body.frictionAir, velocityPrevX = body.position.x - body.positionPrev.x, velocityPrevY = body.position.y - body.positionPrev.y;
+    Body.update = function(body, deltaTime, timeScale, correction) {
+      var deltaTimeSquared = Math.pow(deltaTime * timeScale * body.timeScale, 2);
+      var frictionAir = 1 - body.frictionAir * timeScale * body.timeScale, velocityPrevX = body.position.x - body.positionPrev.x, velocityPrevY = body.position.y - body.positionPrev.y;
       body.velocity.x = velocityPrevX * frictionAir * correction + body.force.x / body.mass * deltaTimeSquared;
       body.velocity.y = velocityPrevY * frictionAir * correction + body.force.y / body.mass * deltaTimeSquared;
       body.positionPrev.x = body.position.x;
@@ -857,8 +856,8 @@
         }
       }
     };
-    Resolver.solveVelocity = function(pairs) {
-      var impulse = {};
+    Resolver.solveVelocity = function(pairs, timeScale) {
+      var impulse = {}, timeScaleSquared = timeScale * timeScale;
       for (var i = 0; i < pairs.length; i++) {
         var pair = pairs[i];
         if (!pair.isActive) continue;
@@ -874,11 +873,11 @@
           var tangentVelocity = Vector.dot(tangent, relativeVelocity), tangentSpeed = Math.abs(tangentVelocity), tangentVelocityDirection = Common.sign(tangentVelocity);
           var normalImpulse = (1 + pair.restitution) * normalVelocity, normalForce = Common.clamp(pair.separation + normalVelocity, 0, 1);
           var tangentImpulse = tangentVelocity;
-          if (tangentSpeed > normalForce * pair.friction) tangentImpulse = normalForce * pair.friction * tangentVelocityDirection;
+          if (tangentSpeed > normalForce * pair.friction * timeScaleSquared) tangentImpulse = normalForce * pair.friction * timeScaleSquared * tangentVelocityDirection;
           var oAcN = Vector.cross(offsetA, normal), oBcN = Vector.cross(offsetB, normal), share = contactShare / (pair.inverseMass + bodyA.inverseInertia * oAcN * oAcN + bodyB.inverseInertia * oBcN * oBcN);
           normalImpulse *= share;
           tangentImpulse *= share;
-          if (normalVelocity < 0 && normalVelocity * normalVelocity > _restingThresh) {
+          if (normalVelocity < 0 && normalVelocity * normalVelocity > _restingThresh * timeScaleSquared) {
             contact.normalImpulse = 0;
             contact.tangentImpulse = 0;
           } else {
@@ -1387,7 +1386,8 @@
           correction:1,
           deltaMin:1e3 / _fps,
           deltaMax:1e3 / (_fps * .5),
-          timeScale:1
+          timeScale:1,
+          isFixed:false
         },
         render:{
           element:element,
@@ -1414,51 +1414,60 @@
       return engine;
     };
     Engine.run = function(engine) {
-      var timing = engine.timing, delta, correction, counterTimestamp = 0, frameCounter = 0, deltaHistory = [], timeScalePrev = 1;
-      (function render(timestamp) {
+      var counterTimestamp = 0, frameCounter = 0, deltaHistory = [], timePrev, timeScalePrev = 1;
+      (function render(time) {
         _requestAnimationFrame(render);
         if (!engine.enabled) return;
-        timestamp = timestamp || 0;
+        var timing = engine.timing, delta, correction;
         var event = {
-          timestamp:timestamp
+          timestamp:time
         };
         Events.trigger(engine, "beforeTick", event);
-        delta = timestamp - timing.timestamp || _delta;
-        deltaHistory.push(delta);
-        deltaHistory = deltaHistory.slice(-_deltaSampleSize);
-        delta = Math.min.apply(null, deltaHistory);
-        delta = delta < timing.deltaMin ? timing.deltaMin :delta;
-        delta = delta > timing.deltaMax ? timing.deltaMax :delta;
-        correction = delta / timing.delta;
+        if (timing.isFixed) {
+          delta = timing.delta;
+        } else {
+          delta = time - timePrev || timing.delta;
+          timePrev = time;
+          deltaHistory.push(delta);
+          deltaHistory = deltaHistory.slice(-_deltaSampleSize);
+          delta = Math.min.apply(null, deltaHistory);
+          delta = delta < timing.deltaMin ? timing.deltaMin :delta;
+          delta = delta > timing.deltaMax ? timing.deltaMax :delta;
+          correction = delta / timing.delta;
+          timing.delta = delta;
+        }
         if (timeScalePrev !== 0) correction *= timing.timeScale / timeScalePrev;
         if (timing.timeScale === 0) correction = 0;
         timeScalePrev = timing.timeScale;
-        timing.timestamp = timestamp;
-        timing.correction = correction;
-        timing.delta = delta;
         frameCounter += 1;
-        if (timestamp - counterTimestamp >= 1e3) {
-          timing.fps = frameCounter * ((timestamp - counterTimestamp) / 1e3);
-          counterTimestamp = timestamp;
+        if (time - counterTimestamp >= 1e3) {
+          timing.fps = frameCounter * ((time - counterTimestamp) / 1e3);
+          counterTimestamp = time;
           frameCounter = 0;
         }
-        Events.trigger(engine, "tick beforeUpdate", event);
+        Events.trigger(engine, "tick", event);
         if (engine.world.isModified) engine.render.controller.clear(engine.render);
         Engine.update(engine, delta, correction);
         _triggerCollisionEvents(engine);
         _triggerMouseEvents(engine);
-        Events.trigger(engine, "afterUpdate beforeRender", event);
-        if (engine.render.options.enabled) engine.render.controller.world(engine);
-        Events.trigger(engine, "afterTick afterRender", event);
+        Engine.render(engine);
+        Events.trigger(engine, "afterTick", event);
       })();
     };
     Engine.update = function(engine, delta, correction) {
+      correction = typeof correction !== "undefined" ? correction :1;
       var world = engine.world, timing = engine.timing, broadphase = engine.broadphase[engine.broadphase.current], broadphasePairs = [], i;
+      timing.timestamp += delta * timing.timeScale;
+      timing.correction = correction;
+      var event = {
+        timestamp:engine.timing.timestamp
+      };
+      Events.trigger(engine, "beforeUpdate", event);
       var allBodies = Composite.allBodies(world), allConstraints = Composite.allConstraints(world);
       Metrics.reset(engine.metrics);
       if (engine.enableSleeping) Sleeping.update(allBodies);
       Body.applyGravityAll(allBodies, world.gravity);
-      Body.updateAll(allBodies, delta * timing.timeScale, correction, world.bounds);
+      Body.updateAll(allBodies, delta, timing.timeScale, correction, world.bounds);
       for (i = 0; i < engine.constraintIterations; i++) {
         Constraint.solveAll(allConstraints, timing.timeScale);
       }
@@ -1477,7 +1486,7 @@
       if (engine.enableSleeping) Sleeping.afterCollisions(pairs.list);
       Resolver.preSolveVelocity(pairs.list);
       for (i = 0; i < engine.velocityIterations; i++) {
-        Resolver.solveVelocity(pairs.list);
+        Resolver.solveVelocity(pairs.list, timing.timeScale);
       }
       for (i = 0; i < engine.positionIterations; i++) {
         Resolver.solvePosition(pairs.list, timing.timeScale);
@@ -1486,7 +1495,16 @@
       Metrics.update(engine.metrics, engine);
       Body.resetForcesAll(allBodies);
       if (world.isModified) Composite.setModified(world, false, false, true);
+      Events.trigger(engine, "afterUpdate", event);
       return engine;
+    };
+    Engine.render = function(engine) {
+      var event = {
+        timestamp:engine.timing.timestamp
+      };
+      Events.trigger(engine, "beforeRender", event);
+      engine.render.controller.world(engine);
+      Events.trigger(engine, "afterRender", event);
     };
     Engine.merge = function(engineA, engineB) {
       Common.extend(engineA, engineB);
@@ -1656,6 +1674,10 @@
     Mouse = function(element) {
       var mouse = this;
       this.element = element || document.body;
+      this.absolute = {
+        x:0,
+        y:0
+      };
       this.position = {
         x:0,
         y:0
@@ -1672,11 +1694,17 @@
         x:0,
         y:0
       };
+      this.scale = {
+        x:1,
+        y:1
+      };
+      this.wheelDelta = 0;
       this.button = -1;
       this.sourceEvents = {
         mousemove:null,
         mousedown:null,
-        mouseup:null
+        mouseup:null,
+        mousewheel:null
       };
       this.mousemove = function(event) {
         var position = _getRelativeMousePosition(event, mouse.element), touches = event.changedTouches;
@@ -1684,8 +1712,10 @@
           mouse.button = 0;
           event.preventDefault();
         }
-        mouse.position.x = position.x + mouse.offset.x;
-        mouse.position.y = position.y + mouse.offset.y;
+        mouse.absolute.x = position.x;
+        mouse.absolute.y = position.y;
+        mouse.position.x = mouse.absolute.x * mouse.scale.x + mouse.offset.x;
+        mouse.position.y = mouse.absolute.y * mouse.scale.y + mouse.offset.y;
         mouse.sourceEvents.mousemove = event;
       };
       this.mousedown = function(event) {
@@ -1696,10 +1726,12 @@
         } else {
           mouse.button = event.button;
         }
-        mouse.position.x = position.x + mouse.offset.x;
-        mouse.position.y = position.y + mouse.offset.y;
-        mouse.mousedownPosition.x = position.x + mouse.offset.x;
-        mouse.mousedownPosition.y = position.y + mouse.offset.y;
+        mouse.absolute.x = position.x;
+        mouse.absolute.y = position.y;
+        mouse.position.x = mouse.absolute.x * mouse.scale.x + mouse.offset.x;
+        mouse.position.y = mouse.absolute.y * mouse.scale.y + mouse.offset.y;
+        mouse.mousedownPosition.x = mouse.position.x;
+        mouse.mousedownPosition.y = mouse.position.y;
         mouse.sourceEvents.mousedown = event;
       };
       this.mouseup = function(event) {
@@ -1708,11 +1740,17 @@
           event.preventDefault();
         }
         mouse.button = -1;
-        mouse.position.x = position.x + mouse.offset.x;
-        mouse.position.y = position.y + mouse.offset.y;
-        mouse.mouseupPosition.x = position.x + mouse.offset.x;
-        mouse.mouseupPosition.y = position.y + mouse.offset.y;
+        mouse.absolute.x = position.x;
+        mouse.absolute.y = position.y;
+        mouse.position.x = mouse.absolute.x * mouse.scale.x + mouse.offset.x;
+        mouse.position.y = mouse.absolute.y * mouse.scale.y + mouse.offset.y;
+        mouse.mouseupPosition.x = mouse.position.x;
+        mouse.mouseupPosition.y = mouse.position.y;
         mouse.sourceEvents.mouseup = event;
+      };
+      this.mousewheel = function(event) {
+        mouse.wheelDelta = Math.max(-1, Math.min(1, event.wheelDelta || -event.detail));
+        event.preventDefault();
       };
       Mouse.setElement(mouse, mouse.element);
     };
@@ -1724,6 +1762,8 @@
       element.addEventListener("mousemove", mouse.mousemove);
       element.addEventListener("mousedown", mouse.mousedown);
       element.addEventListener("mouseup", mouse.mouseup);
+      element.addEventListener("mousewheel", mouse.mousewheel);
+      element.addEventListener("DOMMouseScroll", mouse.mousewheel);
       element.addEventListener("touchmove", mouse.mousemove);
       element.addEventListener("touchstart", mouse.mousedown);
       element.addEventListener("touchend", mouse.mouseup);
@@ -1732,9 +1772,23 @@
       mouse.sourceEvents.mousemove = null;
       mouse.sourceEvents.mousedown = null;
       mouse.sourceEvents.mouseup = null;
+      mouse.sourceEvents.mousewheel = null;
+      mouse.wheelDelta = 0;
+    };
+    Mouse.setOffset = function(mouse, offset) {
+      mouse.offset.x = offset.x;
+      mouse.offset.y = offset.y;
+      mouse.position.x = mouse.absolute.x * mouse.scale.x + mouse.offset.x;
+      mouse.position.y = mouse.absolute.y * mouse.scale.y + mouse.offset.y;
+    };
+    Mouse.setScale = function(mouse, scale) {
+      mouse.scale.x = scale.x;
+      mouse.scale.y = scale.y;
+      mouse.position.x = mouse.absolute.x * mouse.scale.x + mouse.offset.x;
+      mouse.position.y = mouse.absolute.y * mouse.scale.y + mouse.offset.y;
     };
     var _getRelativeMousePosition = function(event, element) {
-      var elementBounds = element.getBoundingClientRect(), scrollX = window.pageXOffset !== undefined ? window.pageXOffset :(document.documentElement || document.body.parentNode || document.body).scrollLeft, scrollY = window.pageYOffset !== undefined ? window.pageYOffset :(document.documentElement || document.body.parentNode || document.body).scrollTop, touches = event.changedTouches, x, y;
+      var elementBounds = element.getBoundingClientRect(), rootNode = document.documentElement || document.body.parentNode || document.body, scrollX = window.pageXOffset !== undefined ? window.pageXOffset :rootNode.scrollLeft, scrollY = window.pageYOffset !== undefined ? window.pageYOffset :rootNode.scrollTop, touches = event.changedTouches, x, y;
       if (touches) {
         x = touches[0].pageX - elementBounds.left - scrollX;
         y = touches[0].pageY - elementBounds.top - scrollY;
@@ -1810,10 +1864,13 @@
           x:x,
           y:y
         },
-        render:{
-          path:"L 0 0 L " + width + " 0 L " + width + " " + height + " L 0 " + height
-        }
+        vertices:Vertices.fromPath("L 0 0 L " + width + " 0 L " + width + " " + height + " L 0 " + height)
       };
+      if (options.chamfer) {
+        var chamfer = options.chamfer;
+        rectangle.vertices = Vertices.chamfer(rectangle.vertices, chamfer.radius, chamfer.quality, chamfer.qualityMin, chamfer.qualityMax);
+        delete options.chamfer;
+      }
       return Body.create(Common.extend({}, rectangle, options));
     };
     Bodies.trapezoid = function(x, y, width, height, slope, options) {
@@ -1827,10 +1884,13 @@
           x:x,
           y:y
         },
-        render:{
-          path:"L 0 0 L " + x1 + " " + -height + " L " + x2 + " " + -height + " L " + x3 + " 0"
-        }
+        vertices:Vertices.fromPath("L 0 0 L " + x1 + " " + -height + " L " + x2 + " " + -height + " L " + x3 + " 0")
       };
+      if (options.chamfer) {
+        var chamfer = options.chamfer;
+        trapezoid.vertices = Vertices.chamfer(trapezoid.vertices, chamfer.radius, chamfer.quality, chamfer.qualityMin, chamfer.qualityMax);
+        delete options.chamfer;
+      }
       return Body.create(Common.extend({}, trapezoid, options));
     };
     Bodies.circle = function(x, y, radius, options, maxSides) {
@@ -1856,10 +1916,13 @@
           x:x,
           y:y
         },
-        render:{
-          path:path
-        }
+        vertices:Vertices.fromPath(path)
       };
+      if (options.chamfer) {
+        var chamfer = options.chamfer;
+        polygon.vertices = Vertices.chamfer(polygon.vertices, chamfer.radius, chamfer.quality, chamfer.qualityMin, chamfer.qualityMax);
+        delete options.chamfer;
+      }
       return Body.create(Common.extend({}, polygon, options));
     };
   })();
@@ -2000,7 +2063,10 @@
         label:"Car"
       }), body = Bodies.trapezoid(xx, yy, width, height, .3, {
         groupId:groupId,
-        friction:.01
+        friction:.01,
+        chamfer:{
+          radius:10
+        }
       });
       var wheelA = Bodies.circle(xx + wheelAOffset, yy + wheelYOffset, wheelSize, {
         groupId:groupId,
@@ -2239,22 +2305,25 @@
       return vertices;
     };
     Vertices.centre = function(vertices) {
-      var cx = 0, cy = 0;
+      var area = Vertices.area(vertices, true), centre = {
+        x:0,
+        y:0
+      }, cross, temp, j;
       for (var i = 0; i < vertices.length; i++) {
-        cx += vertices[i].x;
-        cy += vertices[i].y;
+        j = (i + 1) % vertices.length;
+        cross = Vector.cross(vertices[i], vertices[j]);
+        temp = Vector.mult(Vector.add(vertices[i], vertices[j]), cross);
+        centre = Vector.add(centre, temp);
       }
-      return {
-        x:cx / vertices.length,
-        y:cy / vertices.length
-      };
+      return Vector.div(centre, 6 * area);
     };
-    Vertices.area = function(vertices) {
+    Vertices.area = function(vertices, signed) {
       var area = 0, j = vertices.length - 1;
       for (var i = 0; i < vertices.length; i++) {
         area += (vertices[j].x - vertices[i].x) * (vertices[j].y + vertices[i].y);
         j = i;
       }
+      if (signed) return area / 2;
       return Math.abs(area) / 2;
     };
     Vertices.inertia = function(vertices, mass) {
@@ -2310,6 +2379,41 @@
         vertices[i].y = point.y + delta.y * scaleY;
       }
       return vertices;
+    };
+    Vertices.chamfer = function(vertices, radius, quality, qualityMin, qualityMax) {
+      radius = radius || [ 8 ];
+      if (!radius.length) radius = [ radius ];
+      quality = typeof quality !== "undefined" ? quality :-1;
+      qualityMin = qualityMin || 2;
+      qualityMax = qualityMax || 14;
+      var centre = Vertices.centre(vertices), newVertices = [];
+      for (var i = 0; i < vertices.length; i++) {
+        var prevVertex = vertices[i - 1 >= 0 ? i - 1 :vertices.length - 1], vertex = vertices[i], nextVertex = vertices[(i + 1) % vertices.length], currentRadius = radius[i < radius.length ? i :radius.length - 1];
+        if (currentRadius === 0) {
+          newVertices.push(vertex);
+          continue;
+        }
+        var prevNormal = Vector.normalise({
+          x:vertex.y - prevVertex.y,
+          y:prevVertex.x - vertex.x
+        });
+        var nextNormal = Vector.normalise({
+          x:nextVertex.y - vertex.y,
+          y:vertex.x - nextVertex.x
+        });
+        var diagonalRadius = Math.sqrt(2 * Math.pow(currentRadius, 2)), radiusVector = Vector.mult(Common.clone(prevNormal), currentRadius), midNormal = Vector.normalise(Vector.mult(Vector.add(prevNormal, nextNormal), .5)), scaledVertex = Vector.sub(vertex, Vector.mult(midNormal, diagonalRadius));
+        var precision = quality;
+        if (quality === -1) {
+          precision = Math.pow(currentRadius, .32) * 1.75;
+        }
+        precision = Common.clamp(precision, qualityMin, qualityMax);
+        if (precision % 2 === 1) precision += 1;
+        var alpha = Math.acos(Vector.dot(prevNormal, nextNormal)), theta = alpha / precision;
+        for (var j = 0; j < precision; j++) {
+          newVertices.push(Vector.add(Vector.rotate(radiusVector, theta * j), scaledVertex));
+        }
+      }
+      return newVertices;
     };
   })();
   var Render = {};
@@ -2383,6 +2487,7 @@
       context.fillStyle = "transparent";
       context.fillRect(0, 0, canvas.width, canvas.height);
       context.globalCompositeOperation = "source-over";
+      var boundsWidth = render.bounds.max.x - render.bounds.min.x, boundsHeight = render.bounds.max.y - render.bounds.min.y, boundsScaleX = boundsWidth / render.options.width, boundsScaleY = boundsHeight / render.options.height;
       if (options.hasBounds) {
         for (i = 0; i < allBodies.length; i++) {
           var body = allBodies[i];
@@ -2395,6 +2500,7 @@
           if (!pointAWorld || !pointBWorld) continue;
           if (Bounds.contains(render.bounds, pointAWorld) || Bounds.contains(render.bounds, pointBWorld)) constraints.push(constraint);
         }
+        context.scale(1 / boundsScaleX, 1 / boundsScaleY);
         context.translate(-render.bounds.min.x, -render.bounds.min.y);
       } else {
         constraints = allConstraints;
@@ -2414,7 +2520,9 @@
       Render.constraints(constraints, context);
       if (options.showBroadphase && engine.broadphase.current === "grid") Render.grid(engine, engine.broadphase[engine.broadphase.current].instance, context);
       if (options.showDebug) Render.debug(engine, context);
-      if (options.hasBounds) context.translate(render.bounds.min.x, render.bounds.min.y);
+      if (options.hasBounds) {
+        context.setTransform(1, 0, 0, 1, 0, 0);
+      }
     };
     Render.debug = function(engine, context) {
       var c = context, world = engine.world, render = engine.render, options = render.options, bodies = Composite.allBodies(world), space = "    ";
@@ -2711,7 +2819,11 @@
     };
     Render.inspector = function(inspector, context) {
       var engine = inspector.engine, mouse = engine.input.mouse, selected = inspector.selected, c = context, render = engine.render, options = render.options, bounds;
-      if (options.hasBounds) context.translate(-render.bounds.min.x, -render.bounds.min.y);
+      if (options.hasBounds) {
+        var boundsWidth = render.bounds.max.x - render.bounds.min.x, boundsHeight = render.bounds.max.y - render.bounds.min.y, boundsScaleX = boundsWidth / render.options.width, boundsScaleY = boundsHeight / render.options.height;
+        context.scale(1 / boundsScaleX, 1 / boundsScaleY);
+        context.translate(-render.bounds.min.x, -render.bounds.min.y);
+      }
       for (var i = 0; i < selected.length; i++) {
         var item = selected[i].data;
         context.translate(.5, .5);
@@ -2752,7 +2864,7 @@
         context.fill();
         context.translate(-.5, -.5);
       }
-      if (options.hasBounds) context.translate(render.bounds.min.x, render.bounds.min.y);
+      if (options.hasBounds) context.setTransform(1, 0, 0, 1, 0, 0);
     };
     var _createCanvas = function(width, height) {
       var canvas = document.createElement("canvas");

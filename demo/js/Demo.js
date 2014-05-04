@@ -15,8 +15,11 @@
         Vector = Matter.Vector,
         Vertices = Matter.Vertices,
         MouseConstraint = Matter.MouseConstraint,
-        Query = Matter.Query,
-        Gui = MatterTools.Gui,
+        Mouse = Matter.Mouse,
+        Query = Matter.Query;
+
+    // MatterTools aliases
+    var Gui = MatterTools.Gui,
         Inspector = MatterTools.Inspector;
 
     var Demo = {};
@@ -27,6 +30,7 @@
         _sceneName,
         _mouseConstraint,
         _sceneEvents = [],
+        _useInspector = true,
         _isMobile = /(ipad|iphone|ipod|android)/gi.test(navigator.userAgent);
     
     // initialise the demo
@@ -57,7 +61,7 @@
         
         // get the scene function name from hash
         if (window.location.hash.length !== 0) 
-            _sceneName = window.location.hash.replace('#', '');
+            _sceneName = window.location.hash.replace('#', '').replace('-inspect', '');
 
         // set up a scene with bodies
         Demo[_sceneName]();
@@ -78,33 +82,100 @@
 
     Demo.mixed = function() {
         var _world = _engine.world;
-        
-        Demo.reset();
-        
-        var stack = Composites.stack(20, 20, 15, 4, 0, 0, function(x, y, column, row) {
-            switch (Math.round(Common.random(0, 1))) {
 
+        Demo.reset();
+
+        var stack = Composites.stack(20, 20, 15, 4, 0, 0, function(x, y, column, row) {
+            var sides = Math.round(Common.random(1, 8));
+
+            // triangles can be a little unstable, so avoid until fixed
+            // TODO: make triangles more stable
+            sides = (sides === 3) ? 4 : sides;
+
+            // round the edges of some bodies
+            var chamfer = null;
+            if (sides > 2 && Math.random() > 0.7) {
+                chamfer = {
+                    radius: 10
+                };
+            }
+
+            switch (Math.round(Common.random(0, 1))) {
             case 0:
                 if (Math.random() < 0.8) {
-                    return Bodies.rectangle(x, y, Common.random(20, 50), Common.random(20, 50));
+                    return Bodies.rectangle(x, y, Common.random(25, 50), Common.random(25, 50), { chamfer: chamfer });
                 } else {
-                    return Bodies.rectangle(x, y, Common.random(80, 120), Common.random(20, 30));
+                    return Bodies.rectangle(x, y, Common.random(80, 120), Common.random(25, 30), { chamfer: chamfer });
                 }
                 break;
             case 1:
-                var sides = Math.round(Common.random(1, 8));
-
-                // triangles can be a little unstable, so avoid until fixed
-                // TODO: make triangles more stable
-                sides = (sides === 3) ? 4 : sides;
-
-                return Bodies.polygon(x, y, sides, Common.random(20, 50));
+                return Bodies.polygon(x, y, sides, Common.random(25, 50), { chamfer: chamfer });
             }
         });
-        
+
         World.add(_world, stack);
         
         var renderOptions = _engine.render.options;
+    };
+
+    Demo.rounded = function() {
+        var _world = _engine.world;
+
+        Demo.reset();
+
+        World.add(_world, [
+            Bodies.rectangle(200, 200, 100, 100, { 
+                chamfer:  {
+                    radius: 20
+                }
+            }),
+
+            Bodies.rectangle(300, 200, 100, 100, { 
+                chamfer:  {
+                    radius: [90, 0, 0, 0]
+                }
+            }),
+
+            Bodies.rectangle(400, 200, 200, 200, { 
+                chamfer:  {
+                    radius: [150, 20, 40, 20]
+                }
+            }),
+
+            Bodies.rectangle(200, 200, 200, 200, { 
+                chamfer:  {
+                    radius: [150, 20, 150, 20]
+                }
+            }),
+
+            Bodies.rectangle(300, 200, 200, 50, { 
+                chamfer:  {
+                    radius: [25, 25, 0, 0]
+                }
+            }),
+
+            Bodies.polygon(200, 100, 8, 80, { 
+                chamfer:  {
+                    radius: 30
+                }
+            }),
+
+            Bodies.polygon(300, 100, 5, 80, { 
+                chamfer:  {
+                    radius: [10, 40, 20, 40, 10]
+                }
+            }),
+
+            Bodies.polygon(400, 200, 3, 50, { 
+                chamfer:  {
+                    radius: [20, 0, 20]
+                }
+            })
+        ]);
+
+        var renderOptions = _engine.render.options;
+        renderOptions.showAxes = true;
+        renderOptions.showCollisions = true;
     };
 
     Demo.views = function() {
@@ -132,7 +203,7 @@
         World.add(_world, stack);
 
         // get the centre of the viewport
-        var viewCentre = {
+        var viewportCentre = {
             x: _engine.render.options.width * 0.5,
             y: _engine.render.options.height * 0.5
         };
@@ -143,25 +214,64 @@
         _world.bounds.max.x = 1100;
         _world.bounds.max.y = 900;
 
+        // keep track of current bounds scale (view zoom)
+        var boundsScaleTarget = 1,
+            boundsScale = {
+                x: 1,
+                y: 1
+            };
+
         // use the engine tick event to control our view
         _sceneEvents.push(
-            Events.on(_engine, 'tick', function() {
+            Events.on(_engine, 'beforeTick', function() {
                 var world = _engine.world,
                     mouse = _engine.input.mouse,
-                    render = _engine.render;
+                    render = _engine.render,
+                    translate;
 
-                // get vector from mouse relative to centre of view
-                var mouseRelative = Vector.sub(mouse.position, mouse.offset),
-                    deltaCentre = Vector.sub(mouseRelative, viewCentre);
+                // mouse wheel controls zoom
+                var scaleFactor = mouse.wheelDelta * -0.1;
+                if (scaleFactor !== 0) {
+                    if ((scaleFactor < 0 && boundsScale.x >= 0.6) || (scaleFactor > 0 && boundsScale.x <= 1.4)) {
+                        boundsScaleTarget += scaleFactor;
+                    }
+                }
 
-                // only translate the view if mouse has moved 200px from the centre
-                if (Vector.magnitude(deltaCentre) > 200) {
+                // if scale has changed
+                if (Math.abs(boundsScale.x - boundsScaleTarget) > 0.01) {
+                    // smoothly tween scale factor
+                    scaleFactor = (boundsScaleTarget - boundsScale.x) * 0.2;
+                    boundsScale.x += scaleFactor;
+                    boundsScale.y += scaleFactor;
 
-                    // create a vector to translate the view, allowing the user to control view speed
-                    var translate = {
-                        x: Math.pow(Math.abs(deltaCentre.x), 1.5) * 0.001 * Common.sign(deltaCentre.x),
-                        y: Math.pow(Math.abs(deltaCentre.y), 1.5) * 0.001 * Common.sign(deltaCentre.y)
+                    // scale the render bounds
+                    render.bounds.max.x = render.bounds.min.x + render.options.width * boundsScale.x;
+                    render.bounds.max.y = render.bounds.min.y + render.options.height * boundsScale.y;
+
+                    // translate so zoom is from centre of view
+                    translate = {
+                        x: render.options.width * scaleFactor * -0.5,
+                        y: render.options.height * scaleFactor * -0.5
                     };
+
+                    Bounds.translate(render.bounds, translate);
+
+                    // update mouse
+                    Mouse.setScale(mouse, boundsScale);
+                    Mouse.setOffset(mouse, render.bounds.min);
+                }
+
+                // get vector from mouse relative to centre of viewport
+                var deltaCentre = Vector.sub(mouse.absolute, viewportCentre),
+                    centreDist = Vector.magnitude(deltaCentre);
+
+                // translate the view if mouse has moved over 50px from the centre of viewport
+                if (centreDist > 50) {
+                    // create a vector to translate the view, allowing the user to control view speed
+                    var direction = Vector.normalise(deltaCentre),
+                        speed = Math.min(10, Math.pow(centreDist - 50, 2) * 0.0002);
+
+                    translate = Vector.mult(direction, speed);
 
                     // prevent the view moving outside the world bounds
                     if (render.bounds.min.x + translate.x < world.bounds.min.x)
@@ -176,11 +286,11 @@
                     if (render.bounds.max.y + translate.y > world.bounds.max.y)
                         translate.y = world.bounds.max.y - render.bounds.max.y;
 
+                    // move the view
                     Bounds.translate(render.bounds, translate);
 
-                    // we must update the mouse offset too
-                    mouse.offset.x = render.bounds.min.x;
-                    mouse.offset.y = render.bounds.min.y;
+                    // we must update the mouse too
+                    Mouse.setOffset(mouse, render.bounds.min);
                 }
             })
         );
@@ -290,15 +400,15 @@
         
         Demo.reset();
         
-        scale = 0.8;
+        scale = 0.9;
         World.add(_world, Composites.car(150, 100, 100 * scale, 40 * scale, 30 * scale));
         
-        scale = 0.7;
+        scale = 0.8;
         World.add(_world, Composites.car(350, 300, 100 * scale, 40 * scale, 30 * scale));
         
         World.add(_world, [
-            Bodies.rectangle(200, 150, 700, 20, { isStatic: true, angle: Math.PI * 0.06 }),
-            Bodies.rectangle(500, 350, 700, 20, { isStatic: true, angle: -Math.PI * 0.06 }),
+            Bodies.rectangle(200, 150, 650, 20, { isStatic: true, angle: Math.PI * 0.06 }),
+            Bodies.rectangle(500, 350, 650, 20, { isStatic: true, angle: -Math.PI * 0.06 }),
             Bodies.rectangle(340, 580, 700, 20, { isStatic: true, angle: Math.PI * 0.04 })
         ]);
         
@@ -464,7 +574,88 @@
         
         var renderOptions = _engine.render.options;
         renderOptions.showVelocity = true;
-        //renderOptions.showAngleIndicator = false;
+    };
+
+    Demo.timescale = function() {
+        var _world = _engine.world;
+        
+        Demo.reset();
+
+        var explosion = function(engine) {
+            var bodies = Composite.allBodies(engine.world);
+
+            for (var i = 0; i < bodies.length; i++) {
+                var body = bodies[i];
+
+                if (!body.isStatic && body.position.y >= 500) {
+                    var forceMagnitude = 0.04 * body.mass;
+
+                    Body.applyForce(body, { x: 0, y: 0 }, { 
+                        x: (forceMagnitude + Math.random() * forceMagnitude) * Common.choose([1, -1]), 
+                        y: -forceMagnitude + Math.random() * -forceMagnitude
+                    });
+                }
+            }
+        };
+
+        var timeScaleTarget = 1,
+            counter = 0;
+
+        _sceneEvents.push(
+            Events.on(_engine, 'tick', function(event) {
+                // tween the timescale for bullet time slow-mo
+                _engine.timing.timeScale += (timeScaleTarget - _engine.timing.timeScale) * 0.05;
+
+                counter += 1;
+
+                // every 1.5 sec
+                if (counter >= 60 * 1.5) {
+
+                    // flip the timescale
+                    if (timeScaleTarget < 1) {
+                        timeScaleTarget = 1;
+                    } else {
+                        timeScaleTarget = 0.05;
+                    }
+
+                    // create some random forces
+                    explosion(_engine);
+
+                    // reset counter
+                    counter = 0;
+                }
+            })
+        );
+
+        var bodyOptions = {
+            frictionAir: 0, 
+            friction: 0.0001,
+            restitution: 0.8
+        };
+        
+        // add some small bouncy circles... remember Swordfish?
+        World.add(_world, Composites.stack(20, 100, 15, 3, 20, 40, function(x, y, column, row) {
+            return Bodies.circle(x, y, Common.random(10, 20), bodyOptions);
+        }));
+
+        // add some larger random bouncy objects
+        World.add(_world, Composites.stack(50, 50, 8, 3, 0, 0, function(x, y, column, row) {
+            switch (Math.round(Common.random(0, 1))) {
+
+            case 0:
+                if (Math.random() < 0.8) {
+                    return Bodies.rectangle(x, y, Common.random(20, 50), Common.random(20, 50), bodyOptions);
+                } else {
+                    return Bodies.rectangle(x, y, Common.random(80, 120), Common.random(20, 30), bodyOptions);
+                }
+                break;
+            case 1:
+                return Bodies.polygon(x, y, Math.round(Common.random(4, 8)), Common.random(20, 50), bodyOptions);
+
+            }
+        }));
+        
+        var renderOptions = _engine.render.options;
     };
     
     Demo.stack = function() {
@@ -930,10 +1121,15 @@
         }
 
         // create a Matter.Inspector
-        if (!_isMobile && Inspector) {
+        if (!_isMobile && Inspector && _useInspector) {
             _inspector = Inspector.create(_engine);
 
             Events.on(_inspector, 'import', function() {
+                _mouseConstraint = MouseConstraint.create(_engine);
+                World.add(_engine.world, _mouseConstraint);
+            });
+
+            Events.on(_inspector, 'play', function() {
                 _mouseConstraint = MouseConstraint.create(_engine);
                 World.add(_engine.world, _mouseConstraint);
             });
@@ -1023,12 +1219,14 @@
         // reset id pool
         Common._nextId = 0;
 
-        // reset mouse offset
-        _engine.input.mouse.offset.x = 0;
-        _engine.input.mouse.offset.y = 0;
+        // reset mouse offset and scale (only required for Demo.views)
+        Mouse.setScale(_engine.input.mouse, { x: 1, y: 1 });
+        Mouse.setOffset(_engine.input.mouse, { x: 0, y: 0 });
 
         _engine.enableSleeping = false;
         _engine.world.gravity.y = 1;
+        _engine.world.gravity.x = 0;
+        _engine.timing.timeScale = 1;
 
         var offset = 5;
         World.add(_world, [
