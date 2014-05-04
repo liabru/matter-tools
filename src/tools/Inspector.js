@@ -40,6 +40,7 @@ var Inspector = {};
             hasTransitions: _isWebkit ? true : false,
             bodyClass: '',
             exportIndent: 0,
+            clipboard: [],
             controls: {
                 container: null,
                 worldTree: null
@@ -139,7 +140,10 @@ var Inspector = {};
         help += "[shift + space] pause or play simulation.\n";
         help += "[right click] and drag on empty space to select a region.\n";
         help += "[right click] and drag on an object to move it.\n";
-        help += "[right click + shift] and drag to move whole selection.\n";
+        help += "[right click + shift] and drag to move whole selection.\n\n";
+
+        help += "[ctrl-c] to copy selected world objects.\n";
+        help += "[ctrl-v] to paste copied world objects to mouse position.\n";
         help += "[del] or [backspace] delete selected objects.\n\n";
 
         help += "[shift + s] scale-xy selected objects with mouse or arrows.\n";
@@ -205,6 +209,14 @@ var Inspector = {};
 
         _key('backspace', function() {
             _deleteSelectedObjects(inspector);
+        });
+
+        _key('ctrl+c', function() {
+            _copySelectedObjects(inspector);
+        });
+
+        _key('ctrl+v', function() {
+            _pasteSelectedObjects(inspector);
         });
 
         // prevent the backspace key from navigating back
@@ -597,6 +609,47 @@ var Inspector = {};
         Composite.remove(inspector.root, objects, true);
         _setSelectedObjects(inspector, []);
     };
+
+    var _copySelectedObjects = function(inspector) {
+        inspector.clipboard.length = 0;
+
+        // put selected objects into clipboard
+        for (var i = 0; i < inspector.selected.length; i++) {
+            var object = inspector.selected[i].data;
+
+            if (object.type !== 'body')
+                continue;
+
+            inspector.clipboard.push(object);
+        }
+    };
+
+    var _pasteSelectedObjects = function(inspector) {
+        var objects = [],
+            worldTree = inspector.controls.worldTree.data('jstree');
+
+        // copy objects in world
+        for (var i = 0; i < inspector.clipboard.length; i++) {
+            var object = inspector.clipboard[i],
+                clone = Gui.clone(inspector.serializer, object);
+            Body.translate(clone, { x: 50, y: 50 });
+
+            // add the clone to the same composite as original
+            var node = worldTree.get_node(object.type + '_' + object.id, false),
+                compositeId = node.data.compositeId,
+                composite = Composite.get(inspector.engine.world, compositeId, 'composite');
+
+            Composite.add(composite, clone);
+
+            objects.push(clone);
+        }
+
+        // select clones after waiting for tree to update
+        setTimeout(function() {
+            _setSelectedObjects(inspector, objects);
+        }, 200);
+    };
+
 
     var _updateSelectedMouseDownOffset = function(inspector) {
         var selected = inspector.selected,

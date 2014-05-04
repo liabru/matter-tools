@@ -141,6 +141,20 @@ var Gui = {};
         }, indent);
     };
 
+    /**
+     * Clones an object using a serializer and assigns it a new id
+     * @method serialise
+     * @param {object} serializer
+     * @param {object} object
+     * @param {number} indent
+     * @return {string} The serialised object
+     */
+    Gui.clone = function(serializer, object) {
+        var clone = serializer.parse(Gui.serialise(serializer, object));
+        clone.id = Common.nextId();
+        return clone;
+    };
+
     var _initDatGui = function(gui) {
         var engine = gui.engine,
             datGui = gui.datGui;
@@ -273,7 +287,7 @@ var Gui = {};
         if (gui.chamfer && gui.sides > 2) {
             options.chamfer = {
                 radius: gui.chamfer
-            }
+            };
         }
 
         for (var i = 0; i < gui.amount; i++) {
