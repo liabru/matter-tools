@@ -43,7 +43,9 @@ var Engine = Matter.Engine,
     Render = Matter.Render,
     RenderPixi = Matter.RenderPixi,
     Mouse = Matter.Mouse,
-    Query = Matter.Query;
+    Query = Matter.Query,
+    Grid = Matter.Grid,
+    Detector = Matter.Detector;
 
 // Begin Matter namespace closure
 

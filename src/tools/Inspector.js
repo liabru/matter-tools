@@ -53,6 +53,9 @@ var Inspector = {};
         inspector = Common.extend(inspector, options);
         Inspector.instance = inspector;
 
+        inspector.mouse = Mouse.create(engine.render.canvas);
+        inspector.mouseConstraint = MouseConstraint.create(engine, { mouse: inspector.mouse });
+
         inspector.serializer = new Resurrect({ prefix: '$', cleanup: true });
         inspector.serializer.parse = inspector.serializer.resurrect;
         localStorage.removeItem('pauseState');
@@ -396,12 +399,12 @@ var Inspector = {};
     };
 
     var _getMousePosition = function(inspector) {
-        return Vector.add(inspector.engine.input.mouse.position, inspector.offset);
+        return Vector.add(inspector.mouse.position, inspector.offset);
     };
 
     var _initEngineEvents = function(inspector) {
         var engine = inspector.engine,
-            mouse = engine.input.mouse,
+            mouse = inspector.mouse,
             mousePosition = _getMousePosition(inspector),
             controls = inspector.controls;
 
@@ -461,7 +464,7 @@ var Inspector = {};
             }
 
             // translate mode
-            if (mouse.button === 2 && !mouse.sourceEvents.mousedown && !mouse.sourceEvents.mouseup) {
+            if (mouse.button === 2) {
                 _addBodyClass(inspector, 'ins-cursor-move');
                 _moveSelectedObjects(inspector, mousePosition.x, mousePosition.y);
             } else {
@@ -471,7 +474,7 @@ var Inspector = {};
             inspector.mousePrevPosition = Common.clone(mousePosition);
         });
 
-        Events.on(engine, 'mouseup', function(event) {
+        Events.on(inspector.mouseConstraint, 'mouseup', function(event) {
             // select objects in region if making a region selection
             if (inspector.selectStart !== null) {
                 var selected = Query.region(Composite.allBodies(engine.world), inspector.selectBounds);
@@ -484,9 +487,8 @@ var Inspector = {};
             Events.trigger(inspector, 'selectEnd');
         });
 
-        Events.on(engine, 'mousedown', function(event) {
-            var engine = event.source,
-                bodies = Composite.allBodies(engine.world),
+        Events.on(inspector.mouseConstraint, 'mousedown', function(event) {
+            var bodies = Composite.allBodies(engine.world),
                 constraints = Composite.allConstraints(engine.world),
                 isUnionSelect = _key.shift || _key.control,
                 worldTree = inspector.controls.worldTree.data('jstree'),
@@ -653,7 +655,7 @@ var Inspector = {};
 
     var _updateSelectedMouseDownOffset = function(inspector) {
         var selected = inspector.selected,
-            mouse = inspector.engine.input.mouse,
+            mouse = inspector.mouse,
             mousePosition = _getMousePosition(inspector),
             item,
             data;
@@ -683,7 +685,7 @@ var Inspector = {};
 
     var _moveSelectedObjects = function(inspector, x, y) {
         var selected = inspector.selected,
-            mouse = inspector.engine.input.mouse,
+            mouse = inspector.mouse,
             mousePosition = _getMousePosition(inspector),
             item,
             data;

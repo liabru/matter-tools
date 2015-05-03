@@ -29,12 +29,20 @@ var Gui = {};
         var gui = {
             engine: engine,
             datGui: datGui,
+            broadphase: 'grid',
+            broadphaseCache: {
+                grid: (engine.broadphase.controller === Grid) ? engine.broadphase : Grid.create(),
+                bruteForce: {
+                    detector: Detector.bruteForce
+                }
+            },
             amount: 1,
             size: 40,
             sides: 4,
             density: 0.001,
             restitution: 0,
             friction: 0.1,
+            frictionStatic: 0.5,
             frictionAir: 0.01,
             offset: { x: 0, y: 0 },
             renderer: 'canvas',
@@ -194,6 +202,7 @@ var Gui = {};
         controls.add(gui, 'sides', 1, 8).step(1);
         controls.add(gui, 'density', 0.0001, 0.01).step(0.001);
         controls.add(gui, 'friction', 0, 1).step(0.05);
+        controls.add(gui, 'frictionStatic', 0, 10).step(0.1);
         controls.add(gui, 'frictionAir', 0, gui.frictionAir * 10).step(gui.frictionAir / 10);
         controls.add(gui, 'restitution', 0, 1).step(0.1);
         controls.add(gui, 'chamfer', 0, 30).step(2);
@@ -215,8 +224,9 @@ var Gui = {};
         var physics = datGui.addFolder('Engine');
         physics.add(engine, 'enableSleeping');
 
-        physics.add(engine.broadphase, 'current', ['grid', 'bruteForce'])
+        physics.add(gui, 'broadphase', ['grid', 'bruteForce'])
             .onFinishChange(function(value) {
+                engine.broadphase = gui.broadphaseCache[value];
                 Composite.setModified(engine.world, true, false, false);
             });
 
@@ -238,11 +248,14 @@ var Gui = {};
         render.add(engine.render.options, 'showBounds');
         render.add(engine.render.options, 'showVelocity');
         render.add(engine.render.options, 'showCollisions');
+        render.add(engine.render.options, 'showSeparations');
         render.add(engine.render.options, 'showAxes');
         render.add(engine.render.options, 'showAngleIndicator');
         render.add(engine.render.options, 'showSleeping');
         render.add(engine.render.options, 'showIds');
-        render.add(engine.render.options, 'showShadows');
+        render.add(engine.render.options, 'showVertexNumbers');
+        render.add(engine.render.options, 'showConvexHulls');
+        render.add(engine.render.options, 'showInternalEdges');
         render.add(engine.render.options, 'enabled');
         render.open();
     };
@@ -280,6 +293,7 @@ var Gui = {};
         var options = { 
             density: gui.density,
             friction: gui.friction,
+            frictionStatic: gui.frictionStatic,
             frictionAir: gui.frictionAir,
             restitution: gui.restitution
         };
