@@ -9,6 +9,8 @@ var Gui = {};
 
 (function() {
 
+    var _isWebkit = 'WebkitAppearance' in document.documentElement.style;
+
     /**
      * Description
      * @method create
@@ -46,7 +48,8 @@ var Gui = {};
             frictionAir: 0.01,
             offset: { x: 0, y: 0 },
             renderer: 'canvas',
-            chamfer: 0
+            chamfer: 0,
+            isRecording: false
         };
         
         if (Resurrect) {
@@ -55,6 +58,7 @@ var Gui = {};
         }
 
         _initDatGui(gui);
+        _initGif(gui);
 
         return gui;
     };
@@ -175,6 +179,43 @@ var Gui = {};
             inspect: function() { 
                 if (!Inspector.instance)
                     gui.inspector = Inspector.create(gui.engine); 
+            },
+            recordGif: function() {
+                if (!gui.isRecording) {
+                    gui.gif = new GIF({
+                        workers: 5,
+                        quality: 100,
+                        width: 800,
+                        height: 600
+                    });
+
+                    gui.gif.on('finished', function(blob) {
+                        if (_isWebkit) {
+                            var anchor = document.createElement('a');
+                            anchor.download = 'matter-tools-gif.gif';
+                            anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+                            anchor.dataset.downloadurl = ['image/gif', anchor.download, anchor.href].join(':');
+                            anchor.click();
+                        } else {
+                            window.open(URL.createObjectURL(blob));
+                        }
+                    });
+
+                    gui.isRecording = true;
+                } else {
+                    if (!gui.gif.running) {
+                        gui.isRecording = false;
+                        gui.gif.render();
+                    }
+                }
+
+                setTimeout(function() {
+                    if (gui.isRecording && !gui.gif.running) {
+                        gui.gif.render();
+                    }
+
+                    gui.isRecording = false;
+                }, 5000);
             }
         };
 
@@ -210,11 +251,15 @@ var Gui = {};
         controls.open();
 
         var worldGui = datGui.addFolder('World');
-        worldGui.add(funcs, 'inspect');
         worldGui.add(funcs, 'load');
         worldGui.add(funcs, 'save');
         worldGui.add(funcs, 'clear');
         worldGui.open();
+
+        var toolsGui = datGui.addFolder('Tools');
+        toolsGui.add(funcs, 'inspect');
+        if (window.GIF) toolsGui.add(funcs, 'recordGif');
+        toolsGui.open();
         
         var gravity = worldGui.addFolder('Gravity');
         gravity.add(engine.world.gravity, 'x', -1, 1).step(0.01);
@@ -321,6 +366,22 @@ var Gui = {};
             renderController.clear(engine.render);
 
         Events.trigger(gui, 'clear');
+    };
+
+    var _initGif = function(gui) {
+        if (!window.GIF) {
+            return;
+        }
+
+        var engine = gui.engine,
+            skipFrame = false;
+
+        Matter.Events.on(engine, 'beforeTick', function(event) {
+            if (gui.isRecording && !skipFrame) {
+                gui.gif.addFrame(engine.render.context, { copy: true, delay: 25 });
+            }
+            skipFrame = !skipFrame;
+        });
     };
 
     /*
