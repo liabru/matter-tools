@@ -6,31 +6,48 @@
         <meta name="viewport" content="width=device-width,minimal-ui">
         <meta name="robots" content="noindex">
 
-        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <!-- only required if using Bodies.fromVertices with concave vertices -->
+        <script type="text/javascript" src="./js/libs/decomp.js"></script>
+
+        <!-- only required if using Matter.RenderPixi -->
         <script type="text/javascript" src="./js/libs/pixi.dev.js"></script>
 
-        <link rel="stylesheet" href="./css/matter-tools.css" type="text/css">
+        <!-- matter lib edge master version -->
         <script type="text/javascript" src="./js/libs/matter-dev.js"></script>
+
+        <!-- only required if using MatterTools -->
+        <link rel="stylesheet" href="./css/matter-tools.css" type="text/css">
+        <script type="text/javascript" src="./js/libs/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="./js/libs/matter-tools-dev.js"></script>
 
+        <!-- only required for gif recording -->
+        <script type="text/javascript" src="./js/libs/gif.js"></script>
+
+        <!-- matter demo code -->
         <link rel="stylesheet" href="./css/style.css" type="text/css">
         <script type="text/javascript" src="./js/Demo.js"></script>
 
-        <title>MatterTools Demo</title>
+        <title>Matter.js Demo (Dev. Build)</title>
     </head>
     <body>
         <div class="container">
-            <h1>MatterTools Demo</h1>
-            <p class="nav"><a href="http://brm.io/matter-js/">Project page</a> <span class="nav-sep">&middot;</span> <a href="https://github.com/liabru/matter-tools">GitHub</a></p>
+            <h1>Matter.js Demo (Dev. Build)</h1>
+            <p class="nav"><a href="./mobile.html">Mobile Demo</a> <span class="nav-sep">&middot;</span> <a href="http://brm.io/matter-js/">Project page</a> <span class="nav-sep">&middot;</span> <a href="https://github.com/liabru/matter-js">GitHub</a> <span class="nav-sep">&middot;</span> <a href="http://twitter.com/liabru">@liabru</a></p>
             <div class="controls-container">
                 <select id="demo-select">
                     <option value="mixed">Mixed Shapes</option>
                     <option value="mixedSolid">Solid Rendering</option>
+                    <option value="concave">Concave Bodies</option>
+                    <option value="svg">Concave SVG Paths</option>
+                    <option value="compound">Compound Bodies</option>
                     <option value="newtonsCradle">Newton's Cradle</option>
                     <option value="wreckingBall">Wrecking Ball</option>
+                    <option value="slingshot">Slingshot Game</option>
                     <option value="rounded">Rounded Corners (Chamfering)</option>
                     <option value="views">Views</option>
                     <option value="timescale">Time Scaling</option>
+                    <option value="manipulation">Body Manipulation</option>
+                    <option value="compositeManipulation">Composite Manipulation</option>
                     <option value="sprites">Sprites</option>
                     <option value="pyramid">Pyramid</option>
                     <option value="raycasting">Raycasting</option>
@@ -42,10 +59,12 @@
                     <option value="softBody">Basic Soft Bodies</option>
                     <option value="cloth">Cloth</option>
                     <option value="events">Events</option>
+                    <option value="collisionFiltering">Collision Filtering</option>
                     <option value="chains">Chains</option>
                     <option value="ballPool">Ball Pool</option>
                     <option value="stack">Stack</option>
                     <option value="circleStack">Circle Stack</option>
+                    <option value="compoundStack">Compound Stack</option>
                     <option value="restitution">Restitution</option>
                     <option value="friction">Friction</option>
                     <option value="airFriction">Air Friction</option>
