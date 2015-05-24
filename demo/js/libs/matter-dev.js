@@ -1,5 +1,5 @@
 /**
-* matter-dev.min.js 0.8.0-dev 2015-05-03
+* matter-dev.min.js 0.8.0-dev 2015-05-24
 * http://brm.io/matter-js/
 * License: MIT
 */
@@ -653,12 +653,12 @@
         },
         bounds:{
           min:{
-            x:0,
-            y:0
+            x:-Infinity,
+            y:-Infinity
           },
           max:{
-            x:800,
-            y:600
+            x:Infinity,
+            y:Infinity
           }
         }
       };
@@ -1179,9 +1179,9 @@
             tangentImpulse = pair.friction * tangentVelocityDirection * timeScaleSquared;
             maxFriction = tangentSpeed;
           }
-          var oAcN = Vector.cross(offsetA, normal), oBcN = Vector.cross(offsetB, normal), share = contactShare / (bodyA.inverseMass + bodyB.inverseMass + bodyA.inverseInertia * oAcN * oAcN + bodyB.inverseInertia * oBcN * oBcN);
-          normalImpulse *= share;
-          tangentImpulse *= Math.min(share, 1);
+          var oAcN = Vector.cross(offsetA, normal), oBcN = Vector.cross(offsetB, normal), denom = bodyA.inverseMass + bodyB.inverseMass + bodyA.inverseInertia * oAcN * oAcN + bodyB.inverseInertia * oBcN * oBcN;
+          normalImpulse *= contactShare / denom;
+          tangentImpulse *= contactShare / (1 + denom);
           if (normalVelocity < 0 && normalVelocity * normalVelocity > Resolver._restingThresh * timeScaleSquared) {
             contact.normalImpulse = 0;
             contact.tangentImpulse = 0;
@@ -1675,12 +1675,13 @@
       return value < 0 ? -1 :1;
     };
     Common.now = function() {
-      var perf = window.performance;
-      if (perf) {
-        perf.now = perf.now || perf.webkitNow || perf.msNow || perf.oNow || perf.mozNow;
-        return +perf.now();
-      }
-      return +new Date();
+      var performance = window.performance || {};
+      performance.now = function() {
+        return performance.now || performance.webkitNow || performance.msNow || performance.oNow || performance.mozNow || function() {
+          return +new Date();
+        };
+      }();
+      return performance.now();
     };
     Common.random = function(min, max) {
       min = typeof min !== "undefined" ? min :0;
@@ -1869,7 +1870,6 @@
       for (var i = 0; i < bodies.length; i++) {
         var body = bodies[i];
         if (body.isStatic || body.isSleeping) continue;
-        if (body.bounds.max.x < worldBounds.min.x || body.bounds.min.x > worldBounds.max.x || body.bounds.max.y < worldBounds.min.y || body.bounds.min.y > worldBounds.max.y) continue;
         Body.update(body, deltaTime, timeScale, correction);
       }
     };
@@ -2172,7 +2172,7 @@
       var timeFactor = timeScale * timeScale * timeScale;
       for (var i = 0; i < bodies.length; i++) {
         var body = bodies[i], motion = body.speed * body.speed + body.angularSpeed * body.angularSpeed;
-        if (body.force.x > 0 || body.force.y > 0) {
+        if (body.force.x !== 0 || body.force.y !== 0) {
           Sleeping.set(body, false);
           continue;
         }
@@ -2436,18 +2436,16 @@
     Composites.mesh = function(composite, columns, rows, crossBrace, options) {
       var bodies = composite.bodies, row, col, bodyA, bodyB, bodyC;
       for (row = 0; row < rows; row++) {
-        for (col = 0; col < columns; col++) {
-          if (col > 0) {
-            bodyA = bodies[col - 1 + row * columns];
-            bodyB = bodies[col + row * columns];
-            Composite.addConstraint(composite, Constraint.create(Common.extend({
-              bodyA:bodyA,
-              bodyB:bodyB
-            }, options)));
-          }
+        for (col = 1; col < columns; col++) {
+          bodyA = bodies[col - 1 + row * columns];
+          bodyB = bodies[col + row * columns];
+          Composite.addConstraint(composite, Constraint.create(Common.extend({
+            bodyA:bodyA,
+            bodyB:bodyB
+          }, options)));
         }
-        for (col = 0; col < columns; col++) {
-          if (row > 0) {
+        if (row > 0) {
+          for (col = 0; col < columns; col++) {
             bodyA = bodies[col + (row - 1) * columns];
             bodyB = bodies[col + row * columns];
             Composite.addConstraint(composite, Constraint.create(Common.extend({
@@ -2533,6 +2531,8 @@
         },
         restitution:.5,
         friction:.9,
+        frictionStatic:10,
+        slop:.5,
         density:.01
       });
       var wheelB = Bodies.circle(xx + wheelBOffset, yy + wheelYOffset, wheelSize, {
@@ -2541,6 +2541,8 @@
         },
         restitution:.5,
         friction:.9,
+        frictionStatic:10,
+        slop:.5,
         density:.01
       });
       var axelA = Constraint.create({
@@ -3728,11 +3730,14 @@
         }
       };
       var render = Common.extend(defaults, options), transparent = !render.options.wireframes && render.options.background === "transparent";
-      render.context = new PIXI.WebGLRenderer(render.options.width, render.options.height, render.canvas, transparent, true);
+      render.context = new PIXI.WebGLRenderer(render.options.width, render.options.height, {
+        view:render.canvas,
+        transparent:transparent,
+        antialias:true,
+        backgroundColor:options.background
+      });
       render.canvas = render.context.view;
-      render.container = new PIXI.DisplayObjectContainer();
-      render.stage = new PIXI.Stage();
-      render.stage.addChild(render.container);
+      render.container = new PIXI.Container();
       render.bounds = render.bounds || {
         min:{
           x:0,
@@ -3746,8 +3751,8 @@
       render.textures = {};
       render.sprites = {};
       render.primitives = {};
-      render.spriteBatch = new PIXI.SpriteBatch();
-      render.container.addChild(render.spriteBatch);
+      render.spriteContainer = new PIXI.Container();
+      render.container.addChild(render.spriteContainer);
       if (Common.isElement(render.element)) {
         render.element.appendChild(render.canvas);
       } else {
@@ -3762,20 +3767,20 @@
       return render;
     };
     RenderPixi.clear = function(render) {
-      var container = render.container, spriteBatch = render.spriteBatch;
+      var container = render.container, spriteContainer = render.spriteContainer;
       while (container.children[0]) {
         container.removeChild(container.children[0]);
       }
-      while (spriteBatch.children[0]) {
-        spriteBatch.removeChild(spriteBatch.children[0]);
+      while (spriteContainer.children[0]) {
+        spriteContainer.removeChild(spriteContainer.children[0]);
       }
       var bgSprite = render.sprites["bg-0"];
       render.textures = {};
       render.sprites = {};
       render.primitives = {};
       render.sprites["bg-0"] = bgSprite;
-      if (bgSprite) spriteBatch.addChildAt(bgSprite, 0);
-      render.container.addChild(render.spriteBatch);
+      if (bgSprite) container.addChildAt(bgSprite, 0);
+      render.container.addChild(render.spriteContainer);
       render.currentBackground = null;
       container.scale.set(1, 1);
       container.position.set(0, 0);
@@ -3785,22 +3790,22 @@
         var isColor = background.indexOf && background.indexOf("#") !== -1, bgSprite = render.sprites["bg-0"];
         if (isColor) {
           var color = Common.colorToNumber(background);
-          render.stage.setBackgroundColor(color);
-          if (bgSprite) render.spriteBatch.removeChild(bgSprite);
+          render.context.backgroundColor = color;
+          if (bgSprite) render.container.removeChild(bgSprite);
         } else {
           if (!bgSprite) {
             var texture = _getTexture(render, background);
             bgSprite = render.sprites["bg-0"] = new PIXI.Sprite(texture);
             bgSprite.position.x = 0;
             bgSprite.position.y = 0;
-            render.spriteBatch.addChildAt(bgSprite, 0);
+            render.container.addChildAt(bgSprite, 0);
           }
         }
         render.currentBackground = background;
       }
     };
     RenderPixi.world = function(engine) {
-      var render = engine.render, world = engine.world, context = render.context, stage = render.stage, container = render.container, options = render.options, bodies = Composite.allBodies(world), allConstraints = Composite.allConstraints(world), constraints = [], i;
+      var render = engine.render, world = engine.world, context = render.context, container = render.container, options = render.options, bodies = Composite.allBodies(world), allConstraints = Composite.allConstraints(world), constraints = [], i;
       if (options.wireframes) {
         RenderPixi.setBackground(render, options.wireframeBackground);
       } else {
@@ -3826,7 +3831,7 @@
       }
       for (i = 0; i < bodies.length; i++) RenderPixi.body(engine, bodies[i]);
       for (i = 0; i < constraints.length; i++) RenderPixi.constraint(engine, constraints[i]);
-      context.render(stage);
+      context.render(container);
     };
     RenderPixi.constraint = function(engine, constraint) {
       var render = engine.render, bodyA = constraint.bodyA, bodyB = constraint.bodyB, pointA = constraint.pointA, pointB = constraint.pointB, container = render.container, constraintRender = constraint.render, primitiveId = "c-" + constraint.id, primitive = render.primitives[primitiveId];
@@ -3855,9 +3860,9 @@
       var render = engine.render, bodyRender = body.render;
       if (!bodyRender.visible) return;
       if (bodyRender.sprite && bodyRender.sprite.texture) {
-        var spriteId = "b-" + body.id, sprite = render.sprites[spriteId], spriteBatch = render.spriteBatch;
+        var spriteId = "b-" + body.id, sprite = render.sprites[spriteId], spriteContainer = render.spriteContainer;
         if (!sprite) sprite = render.sprites[spriteId] = _createBodySprite(render, body);
-        if (Common.indexOf(spriteBatch.children, sprite) === -1) spriteBatch.addChild(sprite);
+        if (Common.indexOf(spriteContainer.children, sprite) === -1) spriteContainer.addChild(sprite);
         sprite.position.x = body.position.x;
         sprite.position.y = body.position.y;
         sprite.rotation = body.angle;

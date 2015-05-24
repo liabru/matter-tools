@@ -192,9 +192,8 @@
             horseShoe = Vertices.fromPath('35 7 19 17 14 38 14 58 25 79 45 85 65 84 65 66 46 67 34 59 30 44 33 29 45 23 66 23 66 7 53 7');
 
         var stack = Composites.stack(50, 50, 6, 4, 10, 10, function(x, y, column, row) {
-        // var stack = Composites.stack(50, 50, 1, 1, 1, 1, function(x, y, column, row) {
             var color = Common.choose(['#556270', '#4ECDC4', '#C7F464', '#FF6B6B', '#C44D58']);
-            return Bodies.fromVertices(x, y, Common.choose([arrow, chevron]), {
+            return Bodies.fromVertices(x, y, Common.choose([arrow, chevron, star, horseShoe]), {
                 render: {
                     fillStyle: color,
                     strokeStyle: color
@@ -206,8 +205,6 @@
 
         var renderOptions = _engine.render.options;
         renderOptions.showAngleIndicator = false;
-        renderOptions.showCollisions = true;
-        //_engine.timing.timeScale = 0.5;
     };
 
     Demo.svg = function() {
@@ -290,7 +287,7 @@
             World.add(_world, terrain);
 
             var bodyOptions = {
-                /*frictionAir: 0,*/
+                frictionAir: 0, 
                 friction: 0.0001,
                 restitution: 0.6
             };
@@ -448,12 +445,16 @@
                     Body.setVertices(bodyE, bodyE.vertices);
                 }
 
-                // make bodyA move up and down and rotate constantly
-                Body.setPosition(bodyA, { x: 100, y: 300 + 100 * Math.sin(_engine.timing.timestamp * 0.005) });
-                Body.rotate(bodyA, 0.02);
+                // make bodyA move up and down
+                // body is static so must manually update velocity for friction to work
+                var py = 300 + 100 * Math.sin(_engine.timing.timestamp * 0.002);
+                Body.setVelocity(bodyA, { x: 0, y: py - bodyA.position.y });
+                Body.setPosition(bodyA, { x: 100, y: py });
 
                 // make compound body move up and down and rotate constantly
-                Body.setPosition(compound, { x: 600, y: 300 + 100 * Math.sin(_engine.timing.timestamp * 0.005) });
+                Body.setVelocity(compound, { x: 0, y: py - compound.position.y });
+                Body.setAngularVelocity(compound, 0.02);
+                Body.setPosition(compound, { x: 600, y: py });
                 Body.rotate(compound, 0.02);
 
                 // every 1.5 sec
@@ -761,8 +762,6 @@
         var _world = _engine.world;
         
         Demo.reset();
-
-        //_engine.timing.timeScale = 0.5;
         
         World.add(_world, [
             Bodies.rectangle(300, 180, 700, 20, { isStatic: true, angle: Math.PI * 0.06 }),
@@ -780,8 +779,8 @@
         ]);
 
         var renderOptions = _engine.render.options;
-        renderOptions.showAngleIndicator = true;
-        renderOptions.showCollisions = true;
+        renderOptions.showAngleIndicator = false;
+        renderOptions.showVelocity = true;
     };
 
     Demo.airFriction = function() {
@@ -796,8 +795,48 @@
         ]);
 
         var renderOptions = _engine.render.options;
-        renderOptions.showAngleIndicator = true;
-        renderOptions.showCollisions = true;
+        renderOptions.showAngleIndicator = false;
+        renderOptions.showVelocity = true;
+    };
+
+    Demo.staticFriction = function() {
+        var _world = _engine.world;
+
+        Demo.reset();
+
+        var body = Bodies.rectangle(400, 500, 200, 60, { isStatic: true, chamfer: 10 }),
+            size = 50,
+            counter = -1;
+
+        var stack = Composites.stack(350, 470 - 6 * size, 1, 6, 0, 0, function(x, y, column, row) {
+            return Bodies.rectangle(x, y, size * 2, size, {
+                slop: 0.5,
+                friction: 1,
+                frictionStatic: Infinity
+            });
+        });
+        
+        World.add(_world, [body, stack]);
+
+        _sceneEvents.push(
+            Events.on(_engine, 'beforeUpdate', function(event) {
+                counter += 0.014;
+
+                if (counter < 0) {
+                    return;
+                }
+
+                var px = 400 + 100 * Math.sin(counter);
+
+                // body is static so must manually update velocity for friction to work
+                Body.setVelocity(body, { x: px - body.position.x, y: 0 });
+                Body.setPosition(body, { x: px, y: body.position.y });
+            })
+        );
+
+        var renderOptions = _engine.render.options;
+        renderOptions.showAngleIndicator = false;
+        renderOptions.showVelocity = true;
     };
 
     Demo.sleeping = function() {
@@ -999,7 +1038,7 @@
         
         Demo.reset();
         
-        var stack = Composites.stack(100, 100, 10, 5, 0, 0, function(x, y, column, row) {
+        var stack = Composites.stack(100, 300, 10, 5, 0, 0, function(x, y, column, row) {
             return Bodies.rectangle(x, y, 40, 40);
         });
         
@@ -1027,12 +1066,12 @@
             yy = 600 - 21 - 40 * rows;
         
         var stack = Composites.stack(400, yy, 5, rows, 0, 0, function(x, y, column, row) {
-            return Bodies.rectangle(x, y, 40, 40, { friction: 0.9, restitution: 0.1 });
+            return Bodies.rectangle(x, y, 40, 40);
         });
         
         World.add(_world, stack);
         
-        var ball = Bodies.circle(100, 400, 50, { density: 0.07, frictionAir: 0.001});
+        var ball = Bodies.circle(100, 400, 50, { density: 0.04, frictionAir: 0.005});
         
         World.add(_world, ball);
         World.add(_world, Constraint.create({
@@ -1099,7 +1138,7 @@
         
         Demo.reset();
         
-        var stack = Composites.pyramid(100, 100, 15, 10, 0, 0, function(x, y, column, row) {
+        var stack = Composites.pyramid(100, 258, 15, 10, 0, 0, function(x, y, column, row) {
             return Bodies.rectangle(x, y, 40, 40);
         });
         
@@ -1430,8 +1469,8 @@
             }
         });
 
-        var vertices = Vertices.fromPath('164 171,232 233,213 302,273 241,342 305,316 231,364 170,309 188,281 117,240 182'),
-            concave = Bodies.fromVertices(200, 200, vertices);
+        var star = Vertices.fromPath('50 0 63 38 100 38 69 59 82 100 50 75 18 100 31 59 0 38 37 38'),
+            concave = Bodies.fromVertices(200, 200, star);
         
         World.add(_world, [stack, concave]);
 
