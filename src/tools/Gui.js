@@ -328,8 +328,7 @@ var Gui = {};
 
         engine.render.options = options;
 
-        // bind the mouse to the new canvas
-        Mouse.setElement(engine.input.mouse, engine.render.canvas);
+        Events.trigger(gui, 'setRenderer');
     };
 
     var _addBody = function(gui) {
