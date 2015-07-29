@@ -15,10 +15,11 @@ var Gui = {};
      * Description
      * @method create
      * @param {engine} engine
+     * @param {runner} runner
      * @param {object} options
      * @return {gui} A container for a configured dat.gui
      */
-    Gui.create = function(engine, options) {
+    Gui.create = function(engine, runner, options) {
         var _datGuiSupported = window.dat && window.localStorage;
 
         if (!_datGuiSupported) {
@@ -30,6 +31,7 @@ var Gui = {};
 
         var gui = {
             engine: engine,
+            runner: runner,
             datGui: datGui,
             broadphase: 'grid',
             broadphaseCache: {
@@ -169,6 +171,7 @@ var Gui = {};
 
     var _initDatGui = function(gui) {
         var engine = gui.engine,
+            runner = gui.runner,
             datGui = gui.datGui;
 
         var funcs = {
@@ -178,7 +181,7 @@ var Gui = {};
             load: function() { Gui.loadState(gui.serializer, engine, 'guiState'); Events.trigger(gui, 'load'); },
             inspect: function() { 
                 if (!Inspector.instance)
-                    gui.inspector = Inspector.create(gui.engine); 
+                    gui.inspector = Inspector.create(gui.engine, gui.runner); 
             },
             recordGif: function() {
                 if (!gui.isRecording) {
@@ -220,11 +223,11 @@ var Gui = {};
         };
 
         var metrics = datGui.addFolder('Metrics');
-        metrics.add(engine.timing, 'fps').listen();
+        metrics.add(runner, 'fps').listen();
 
         if (engine.metrics.extended) {
-            metrics.add(engine.timing, 'delta').listen();
-            metrics.add(engine.timing, 'correction').listen();
+            metrics.add(runner, 'delta').listen();
+            metrics.add(runner, 'correction').listen();
             metrics.add(engine.metrics, 'bodies').listen();
             metrics.add(engine.metrics, 'collisions').listen();
             metrics.add(engine.metrics, 'pairs').listen();
@@ -278,7 +281,7 @@ var Gui = {};
         physics.add(engine.timing, 'timeScale', 0, 1.2).step(0.05).listen();
         physics.add(engine, 'velocityIterations', 1, 10).step(1);
         physics.add(engine, 'positionIterations', 1, 10).step(1);
-        physics.add(engine, 'enabled');
+        physics.add(runner, 'enabled');
         physics.open();
 
         var render = datGui.addFolder('Render');
@@ -375,7 +378,7 @@ var Gui = {};
         var engine = gui.engine,
             skipFrame = false;
 
-        Matter.Events.on(engine, 'beforeTick', function(event) {
+        Matter.Events.on(gui.runner, 'beforeTick', function(event) {
             if (gui.isRecording && !skipFrame) {
                 gui.gif.addFrame(engine.render.context, { copy: true, delay: 25 });
             }

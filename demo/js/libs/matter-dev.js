@@ -1,5 +1,5 @@
 /**
-* matter-dev.min.js 0.8.0-dev 2015-05-24
+* matter-dev.min.js 0.8.0-dev 2015-07-29
 * http://brm.io/matter-js/
 * License: MIT
 */
@@ -1067,7 +1067,7 @@
       }
     };
     Resolver.solvePosition = function(pairs, timeScale) {
-      var i, pair, collision, bodyA, bodyB, normal, bodyBtoA, contactShare, contactCount = {}, tempA = Vector._temp[0], tempB = Vector._temp[1], tempC = Vector._temp[2], tempD = Vector._temp[3];
+      var i, pair, collision, bodyA, bodyB, normal, bodyBtoA, contactShare, positionImpulse, contactCount = {}, tempA = Vector._temp[0], tempB = Vector._temp[1], tempC = Vector._temp[2], tempD = Vector._temp[3];
       for (i = 0; i < pairs.length; i++) {
         pair = pairs[i];
         if (!pair.isActive) continue;
@@ -1724,54 +1724,49 @@
   })();
   var Engine = {};
   (function() {
-    var _fps = 60, _delta = 1e3 / _fps;
     Engine.create = function(element, options) {
       options = Common.isElement(element) ? options :element;
       element = Common.isElement(element) ? element :null;
       var defaults = {
-        enabled:true,
         positionIterations:6,
         velocityIterations:4,
         constraintIterations:2,
         enableSleeping:false,
         events:[],
         timing:{
-          fps:_fps,
           timestamp:0,
-          delta:_delta,
-          correction:1,
-          deltaMin:1e3 / _fps,
-          deltaMax:1e3 / (_fps * .5),
-          timeScale:1,
-          isFixed:false,
-          frameRequestId:0
-        },
-        render:{
-          element:element,
-          controller:Render
+          timeScale:1
         },
         broadphase:{
           controller:Grid
         }
       };
       var engine = Common.extend(defaults, options);
-      engine.render = engine.render.controller.create(engine.render);
+      if (element || engine.render) {
+        var renderDefaults = {
+          element:element,
+          controller:Render
+        };
+        engine.render = Common.extend(renderDefaults, engine.render);
+      }
+      if (engine.render && engine.render.controller) {
+        engine.render = engine.render.controller.create(engine.render);
+      }
       engine.world = World.create(engine.world);
       engine.pairs = Pairs.create();
       engine.broadphase = engine.broadphase.controller.create(engine.broadphase);
       engine.metrics = engine.metrics || {
         extended:false
       };
-      engine.metrics = engine.metrics || Metrics.create();
+      engine.metrics = Metrics.create(engine.metrics);
       return engine;
     };
     Engine.update = function(engine, delta, correction) {
       correction = typeof correction !== "undefined" ? correction :1;
       var world = engine.world, timing = engine.timing, broadphase = engine.broadphase, broadphasePairs = [], i;
       timing.timestamp += delta * timing.timeScale;
-      timing.correction = correction;
       var event = {
-        timestamp:engine.timing.timestamp
+        timestamp:timing.timestamp
       };
       Events.trigger(engine, "beforeUpdate", event);
       var allBodies = Composite.allBodies(world), allConstraints = Composite.allConstraints(world);
@@ -1818,14 +1813,6 @@
       if (world.isModified) Composite.setModified(world, false, false, true);
       Events.trigger(engine, "afterUpdate", event);
       return engine;
-    };
-    Engine.render = function(engine) {
-      var event = {
-        timestamp:engine.timing.timestamp
-      };
-      Events.trigger(engine, "beforeRender", event);
-      engine.render.controller.world(engine);
-      Events.trigger(engine, "afterRender", event);
     };
     Engine.merge = function(engineA, engineB) {
       Common.extend(engineA, engineB);
@@ -1928,8 +1915,8 @@
   })();
   var Metrics = {};
   (function() {
-    Metrics.create = function() {
-      return {
+    Metrics.create = function(options) {
+      var defaults = {
         extended:false,
         narrowDetections:0,
         narrowphaseTests:0,
@@ -1945,6 +1932,7 @@
         bodies:0,
         pairs:0
       };
+      return Common.extend(defaults, false, options);
     };
     Metrics.reset = function(metrics) {
       if (metrics.extended) {
@@ -2113,54 +2101,97 @@
   })();
   var Runner = {};
   (function() {
-    var _fps = 60, _deltaSampleSize = _fps, _delta = 1e3 / _fps;
+    if (typeof window === "undefined") {
+      return;
+    }
     var _requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.msRequestAnimationFrame || function(callback) {
       window.setTimeout(function() {
         callback(Common.now());
-      }, _delta);
+      }, 1e3 / 60);
     };
     var _cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame;
-    Runner.run = function(engine) {
-      var counterTimestamp = 0, frameCounter = 0, deltaHistory = [], timePrev, timeScalePrev = 1;
-      (function render(time) {
-        var timing = engine.timing, delta, correction = 1;
-        timing.frameRequestId = _requestAnimationFrame(render);
-        if (!engine.enabled) return;
-        var event = {
-          timestamp:time
-        };
-        Events.trigger(engine, "beforeTick", event);
-        if (timing.isFixed) {
-          delta = timing.delta;
-        } else {
-          delta = time - timePrev || timing.delta;
-          timePrev = time;
-          deltaHistory.push(delta);
-          deltaHistory = deltaHistory.slice(-_deltaSampleSize);
-          delta = Math.min.apply(null, deltaHistory);
-          delta = delta < timing.deltaMin ? timing.deltaMin :delta;
-          delta = delta > timing.deltaMax ? timing.deltaMax :delta;
-          correction = delta / timing.delta;
-          timing.delta = delta;
-        }
-        if (timeScalePrev !== 0) correction *= timing.timeScale / timeScalePrev;
-        if (timing.timeScale === 0) correction = 0;
-        timeScalePrev = timing.timeScale;
-        frameCounter += 1;
-        if (time - counterTimestamp >= 1e3) {
-          timing.fps = frameCounter * ((time - counterTimestamp) / 1e3);
-          counterTimestamp = time;
-          frameCounter = 0;
-        }
-        Events.trigger(engine, "tick", event);
-        if (engine.world.isModified && engine.render.controller.clear) engine.render.controller.clear(engine.render);
-        Engine.update(engine, delta, correction);
-        Engine.render(engine);
-        Events.trigger(engine, "afterTick", event);
-      })();
+    Runner.create = function(options) {
+      var defaults = {
+        fps:60,
+        correction:1,
+        deltaSampleSize:60,
+        counterTimestamp:0,
+        frameCounter:0,
+        deltaHistory:[],
+        timePrev:null,
+        timeScalePrev:1,
+        frameRequestId:null,
+        isFixed:false,
+        enabled:true
+      };
+      var runner = Common.extend(defaults, options);
+      runner.delta = 1e3 / runner.fps;
+      runner.deltaMin = 1e3 / runner.fps;
+      runner.deltaMax = 1e3 / (runner.fps * .5);
+      return runner;
     };
-    Runner.stop = function(engine) {
-      _cancelAnimationFrame(engine.timing.frameRequestId);
+    Runner.run = function(runner, engine) {
+      if (typeof runner.positionIterations !== "undefined") {
+        engine = runner;
+        runner = Runner.create();
+      }
+      (function render(time) {
+        runner.frameRequestId = _requestAnimationFrame(render);
+        if (time && runner.enabled) {
+          Runner.tick(runner, engine, time);
+        }
+      })();
+      return runner;
+    };
+    Runner.tick = function(runner, engine, time) {
+      var timing = engine.timing, correction = 1, delta;
+      var event = {
+        timestamp:timing.timestamp
+      };
+      Events.trigger(runner, "beforeTick", event);
+      Events.trigger(engine, "beforeTick", event);
+      if (runner.isFixed) {
+        delta = runner.delta;
+      } else {
+        delta = time - runner.timePrev || runner.delta;
+        runner.timePrev = time;
+        runner.deltaHistory.push(delta);
+        runner.deltaHistory = runner.deltaHistory.slice(-runner.deltaSampleSize);
+        delta = Math.min.apply(null, runner.deltaHistory);
+        delta = delta < runner.deltaMin ? runner.deltaMin :delta;
+        delta = delta > runner.deltaMax ? runner.deltaMax :delta;
+        correction = delta / runner.delta;
+        runner.delta = delta;
+      }
+      if (runner.timeScalePrev !== 0) correction *= timing.timeScale / runner.timeScalePrev;
+      if (timing.timeScale === 0) correction = 0;
+      runner.timeScalePrev = timing.timeScale;
+      runner.frameCounter += 1;
+      if (time - runner.counterTimestamp >= 1e3) {
+        runner.fps = runner.frameCounter * ((time - runner.counterTimestamp) / 1e3);
+        runner.counterTimestamp = time;
+        runner.frameCounter = 0;
+      }
+      Events.trigger(runner, "tick", event);
+      Events.trigger(engine, "tick", event);
+      if (engine.world.isModified && engine.render && engine.render.controller && engine.render.controller.clear) {
+        engine.render.controller.clear(engine.render);
+      }
+      Events.trigger(runner, "beforeUpdate", event);
+      Engine.update(engine, delta, correction);
+      Events.trigger(runner, "afterUpdate", event);
+      if (engine.render) {
+        Events.trigger(runner, "beforeRender", event);
+        Events.trigger(engine, "beforeRender", event);
+        engine.render.controller.world(engine);
+        Events.trigger(runner, "afterRender", event);
+        Events.trigger(engine, "afterRender", event);
+      }
+      Events.trigger(runner, "afterTick", event);
+      Events.trigger(engine, "afterTick", event);
+    };
+    Runner.stop = function(runner) {
+      _cancelAnimationFrame(runner.frameRequestId);
     };
   })();
   var Sleeping = {};
@@ -2202,6 +2233,7 @@
       }
     };
     Sleeping.set = function(body, isSleeping) {
+      var wasSleeping = body.isSleeping;
       if (isSleeping) {
         body.isSleeping = true;
         body.sleepCounter = body.sleepThreshold;
@@ -2213,9 +2245,15 @@
         body.speed = 0;
         body.angularSpeed = 0;
         body.motion = 0;
+        if (!wasSleeping) {
+          Events.trigger(body, "sleepStart");
+        }
       } else {
         body.isSleeping = false;
         body.sleepCounter = 0;
+        if (wasSleeping) {
+          Events.trigger(body, "sleepEnd");
+        }
       }
     };
   })();
@@ -2674,7 +2712,7 @@
   var Svg = {};
   (function() {
     Svg.pathToVertices = function(path, sampleLength) {
-      var i, il, total, point, segment, segments, segmentsQueue, lastSegment, lastPoint, segmentIndex, points = [], length = 0, x = 0, y = 0;
+      var i, il, total, point, segment, segments, segmentsQueue, lastSegment, lastPoint, segmentIndex, points = [], lx, ly, length = 0, x = 0, y = 0;
       sampleLength = sampleLength || 15;
       var addPoint = function(px, py, pathSegType) {
         var isRelative = pathSegType % 2 === 1 && pathSegType > 1;
@@ -3189,6 +3227,10 @@
     };
     Render.world = function(engine) {
       var render = engine.render, world = engine.world, canvas = render.canvas, context = render.context, options = render.options, allBodies = Composite.allBodies(world), allConstraints = Composite.allConstraints(world), background = options.wireframes ? options.wireframeBackground :options.background, bodies = [], constraints = [], i;
+      var event = {
+        timestamp:engine.timing.timestamp
+      };
+      Events.trigger(render, "beforeRender", event);
       if (render.currentBackground !== background) _applyBackground(render, background);
       context.globalCompositeOperation = "source-in";
       context.fillStyle = "transparent";
@@ -3233,6 +3275,7 @@
       if (options.hasBounds) {
         context.setTransform(options.pixelRatio, 0, 0, options.pixelRatio, 0, 0);
       }
+      Events.trigger(render, "afterRender", event);
     };
     Render.debug = function(engine, context) {
       var c = context, world = engine.world, render = engine.render, options = render.options, bodies = Composite.allBodies(world), space = "    ";
@@ -3320,7 +3363,7 @@
       }
     };
     Render.bodies = function(engine, bodies, context) {
-      var c = context, render = engine.render, options = render.options, body, part, i;
+      var c = context, render = engine.render, options = render.options, body, part, i, k;
       for (i = 0; i < bodies.length; i++) {
         body = bodies[i];
         if (!body.render.visible) continue;
@@ -3477,7 +3520,7 @@
       c.stroke();
     };
     Render.bodyPositions = function(engine, bodies, context) {
-      var c = context, render = engine.render, options = render.options, body, part, i;
+      var c = context, render = engine.render, options = render.options, body, part, i, k;
       c.beginPath();
       for (i = 0; i < bodies.length; i++) {
         body = bodies[i];

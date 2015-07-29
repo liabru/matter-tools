@@ -17,10 +17,11 @@ var Inspector = {};
      * Creates a new inspector tool and inserts it into the page. Requires keymaster, jQuery, jsTree libraries.
      * @method create
      * @param {engine} engine
+     * @param {runner} runner
      * @param {object} options
      * @return {inspector} An inspector
      */
-    Inspector.create = function(engine, options) {
+    Inspector.create = function(engine, runner, options) {
         if (!jQuery || !$.fn.jstree || !window.key) {
             console.log('Could not create inspector. Check keymaster, jQuery, jsTree libraries are loaded first.');
             return;
@@ -28,6 +29,7 @@ var Inspector = {};
 
         var inspector = {
             engine: engine,
+            runner: runner,
             isPaused: false,
             selected: [],
             selectStart: null,
@@ -408,7 +410,7 @@ var Inspector = {};
             mousePosition = _getMousePosition(inspector),
             controls = inspector.controls;
 
-        Events.on(engine, 'tick', function() {
+        Events.on(inspector.engine, 'beforeUpdate', function() {
             // update mouse position reference
             mousePosition = _getMousePosition(inspector);
 
@@ -570,7 +572,7 @@ var Inspector = {};
         });
 
         // render hook
-        Events.on(engine, 'afterRender', function() {
+        Events.on(inspector.engine.render, 'afterRender', function() {
             var renderController = engine.render.controller,
                 context = engine.render.context;
             if (renderController.inspector)
