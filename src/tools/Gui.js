@@ -281,10 +281,6 @@ var Gui = {};
         physics.open();
 
         var render = datGui.addFolder('Render');
-
-        render.add(gui, 'renderer', ['canvas', 'webgl'])
-            .onFinishChange(function(value) { _setRenderer(gui, value); });
-
         render.add(gui.render.options, 'wireframes');
         render.add(gui.render.options, 'showDebug');
         render.add(gui.render.options, 'showPositions');
@@ -302,32 +298,6 @@ var Gui = {};
         render.add(gui.render.options, 'showInternalEdges');
         render.add(gui.render.options, 'enabled');
         render.open();
-    };
-
-    var _setRenderer = function(gui, rendererName) {
-        var engine = gui.engine,
-            controller;
-
-        if (rendererName === 'canvas')
-            controller = Render;
-
-        if (rendererName === 'webgl')
-            controller = RenderPixi;
-
-        // remove old canvas
-        gui.render.element.removeChild(gui.render.canvas);
-
-        // create new renderer using the same options object
-        var options = gui.render.options;
-
-        gui.render = controller.create({
-            element: gui.render.element,
-            options: options
-        });
-
-        gui.render = options;
-
-        Events.trigger(gui, 'setRenderer');
     };
 
     var _addBody = function(gui) {
