@@ -18,18 +18,20 @@ var Inspector = {};
      * @method create
      * @param {engine} engine
      * @param {runner} runner
+     * @param {render} render
      * @param {object} options
      * @return {inspector} An inspector
      */
-    Inspector.create = function(engine, runner, options) {
+    Inspector.create = function(engine, runner, render, options) {
         if (!jQuery || !$.fn.jstree || !window.key) {
             console.log('Could not create inspector. Check keymaster, jQuery, jsTree libraries are loaded first.');
             return;
         }
 
         var inspector = {
-            engine: engine,
-            runner: runner,
+            engine: null,
+            runner: null,
+            render: null,
             isPaused: false,
             selected: [],
             selectStart: null,
@@ -55,7 +57,11 @@ var Inspector = {};
         inspector = Common.extend(inspector, options);
         Inspector.instance = inspector;
 
-        inspector.mouse = Mouse.create(engine.render.canvas);
+        inspector.engine = engine;
+        inspector.runner = runner;
+        inspector.render = render;
+
+        inspector.mouse = Mouse.create(inspector.render.canvas);
         inspector.mouseConstraint = MouseConstraint.create(engine, { mouse: inspector.mouse });
 
         inspector.serializer = new Resurrect({ prefix: '$', cleanup: true });
@@ -572,9 +578,9 @@ var Inspector = {};
         });
 
         // render hook
-        Events.on(inspector.engine.render, 'afterRender', function() {
-            var renderController = engine.render.controller,
-                context = engine.render.context;
+        Events.on(inspector.render, 'afterRender', function() {
+            var renderController = inspector.render.controller,
+                context = inspector.render.context;
             if (renderController.inspector)
                 renderController.inspector(inspector, context);
         });

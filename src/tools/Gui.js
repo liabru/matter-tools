@@ -16,10 +16,11 @@ var Gui = {};
      * @method create
      * @param {engine} engine
      * @param {runner} runner
+     * @param {render} render
      * @param {object} options
      * @return {gui} A container for a configured dat.gui
      */
-    Gui.create = function(engine, runner, options) {
+    Gui.create = function(engine, runner, render, options) {
         var _datGuiSupported = window.dat && window.localStorage;
 
         if (!_datGuiSupported) {
@@ -32,6 +33,7 @@ var Gui = {};
         var gui = {
             engine: engine,
             runner: runner,
+            render: render,
             datGui: datGui,
             broadphase: 'grid',
             broadphaseCache: {
@@ -181,7 +183,7 @@ var Gui = {};
             load: function() { Gui.loadState(gui.serializer, engine, 'guiState'); Events.trigger(gui, 'load'); },
             inspect: function() { 
                 if (!Inspector.instance)
-                    gui.inspector = Inspector.create(gui.engine, gui.runner); 
+                    gui.inspector = Inspector.create(gui.engine, gui.runner, gui.render); 
             },
             recordGif: function() {
                 if (!gui.isRecording) {
@@ -283,22 +285,22 @@ var Gui = {};
         render.add(gui, 'renderer', ['canvas', 'webgl'])
             .onFinishChange(function(value) { _setRenderer(gui, value); });
 
-        render.add(engine.render.options, 'wireframes');
-        render.add(engine.render.options, 'showDebug');
-        render.add(engine.render.options, 'showPositions');
-        render.add(engine.render.options, 'showBroadphase');
-        render.add(engine.render.options, 'showBounds');
-        render.add(engine.render.options, 'showVelocity');
-        render.add(engine.render.options, 'showCollisions');
-        render.add(engine.render.options, 'showSeparations');
-        render.add(engine.render.options, 'showAxes');
-        render.add(engine.render.options, 'showAngleIndicator');
-        render.add(engine.render.options, 'showSleeping');
-        render.add(engine.render.options, 'showIds');
-        render.add(engine.render.options, 'showVertexNumbers');
-        render.add(engine.render.options, 'showConvexHulls');
-        render.add(engine.render.options, 'showInternalEdges');
-        render.add(engine.render.options, 'enabled');
+        render.add(gui.render.options, 'wireframes');
+        render.add(gui.render.options, 'showDebug');
+        render.add(gui.render.options, 'showPositions');
+        render.add(gui.render.options, 'showBroadphase');
+        render.add(gui.render.options, 'showBounds');
+        render.add(gui.render.options, 'showVelocity');
+        render.add(gui.render.options, 'showCollisions');
+        render.add(gui.render.options, 'showSeparations');
+        render.add(gui.render.options, 'showAxes');
+        render.add(gui.render.options, 'showAngleIndicator');
+        render.add(gui.render.options, 'showSleeping');
+        render.add(gui.render.options, 'showIds');
+        render.add(gui.render.options, 'showVertexNumbers');
+        render.add(gui.render.options, 'showConvexHulls');
+        render.add(gui.render.options, 'showInternalEdges');
+        render.add(gui.render.options, 'enabled');
         render.open();
     };
 
@@ -313,17 +315,17 @@ var Gui = {};
             controller = RenderPixi;
 
         // remove old canvas
-        engine.render.element.removeChild(engine.render.canvas);
+        gui.render.element.removeChild(gui.render.canvas);
 
         // create new renderer using the same options object
-        var options = engine.render.options;
+        var options = gui.render.options;
 
-        engine.render = controller.create({
-            element: engine.render.element,
+        gui.render = controller.create({
+            element: gui.render.element,
             options: options
         });
 
-        engine.render.options = options;
+        gui.render = options;
 
         Events.trigger(gui, 'setRenderer');
     };
@@ -357,9 +359,9 @@ var Gui = {};
         Engine.clear(engine);
 
         // clear scene graph (if defined in controller)
-        var renderController = engine.render.controller;
+        var renderController = gui.render.controller;
         if (renderController.clear)
-            renderController.clear(engine.render);
+            renderController.clear(gui.render);
 
         Events.trigger(gui, 'clear');
     };
@@ -374,7 +376,7 @@ var Gui = {};
 
         Matter.Events.on(gui.runner, 'beforeTick', function(event) {
             if (gui.isRecording && !skipFrame) {
-                gui.gif.addFrame(engine.render.context, { copy: true, delay: 25 });
+                gui.gif.addFrame(gui.render.context, { copy: true, delay: 25 });
             }
             skipFrame = !skipFrame;
         });
