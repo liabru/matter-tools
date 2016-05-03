@@ -1,5 +1,5 @@
 /**
-* matter-tools.js 0.5.0-edge 2014-05-04
+* matter-tools.js 0.5.0-edge 2016-05-03
 * https://github.com/liabru/matter-tools
 * License: MIT
 */
@@ -49,7 +49,9 @@ var Engine = Matter.Engine,
     Render = Matter.Render,
     RenderPixi = Matter.RenderPixi,
     Mouse = Matter.Mouse,
-    Query = Matter.Query;
+    Query = Matter.Query,
+    Grid = Matter.Grid,
+    Detector = Matter.Detector;
 
 // Begin Matter namespace closure
 
@@ -70,14 +72,18 @@ var Gui = {};
 
 (function() {
 
+    var _isWebkit = 'WebkitAppearance' in document.documentElement.style;
+
     /**
      * Description
      * @method create
      * @param {engine} engine
+     * @param {runner} runner
+     * @param {render} render
      * @param {object} options
      * @return {gui} A container for a configured dat.gui
      */
-    Gui.create = function(engine, options) {
+    Gui.create = function(engine, runner, render, options) {
         var _datGuiSupported = window.dat && window.localStorage;
 
         if (!_datGuiSupported) {
@@ -89,17 +95,28 @@ var Gui = {};
 
         var gui = {
             engine: engine,
+            runner: runner,
+            render: render,
             datGui: datGui,
+            broadphase: 'grid',
+            broadphaseCache: {
+                grid: (engine.broadphase.controller === Grid) ? engine.broadphase : Grid.create(),
+                bruteForce: {
+                    detector: Detector.bruteForce
+                }
+            },
             amount: 1,
             size: 40,
             sides: 4,
             density: 0.001,
             restitution: 0,
             friction: 0.1,
+            frictionStatic: 0.5,
             frictionAir: 0.01,
             offset: { x: 0, y: 0 },
             renderer: 'canvas',
-            chamfer: 0
+            chamfer: 0,
+            isRecording: false
         };
         
         if (Resurrect) {
@@ -108,6 +125,7 @@ var Gui = {};
         }
 
         _initDatGui(gui);
+        _initGif(gui);
 
         return gui;
     };
@@ -218,6 +236,7 @@ var Gui = {};
 
     var _initDatGui = function(gui) {
         var engine = gui.engine,
+            runner = gui.runner,
             datGui = gui.datGui;
 
         var funcs = {
@@ -227,16 +246,53 @@ var Gui = {};
             load: function() { Gui.loadState(gui.serializer, engine, 'guiState'); Events.trigger(gui, 'load'); },
             inspect: function() { 
                 if (!Inspector.instance)
-                    gui.inspector = Inspector.create(gui.engine); 
+                    gui.inspector = Inspector.create(gui.engine, gui.runner, gui.render); 
+            },
+            recordGif: function() {
+                if (!gui.isRecording) {
+                    gui.gif = new GIF({
+                        workers: 5,
+                        quality: 100,
+                        width: 800,
+                        height: 600
+                    });
+
+                    gui.gif.on('finished', function(blob) {
+                        if (_isWebkit) {
+                            var anchor = document.createElement('a');
+                            anchor.download = 'matter-tools-gif.gif';
+                            anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+                            anchor.dataset.downloadurl = ['image/gif', anchor.download, anchor.href].join(':');
+                            anchor.click();
+                        } else {
+                            window.open(URL.createObjectURL(blob));
+                        }
+                    });
+
+                    gui.isRecording = true;
+                } else {
+                    if (!gui.gif.running) {
+                        gui.isRecording = false;
+                        gui.gif.render();
+                    }
+                }
+
+                setTimeout(function() {
+                    if (gui.isRecording && !gui.gif.running) {
+                        gui.gif.render();
+                    }
+
+                    gui.isRecording = false;
+                }, 5000);
             }
         };
 
         var metrics = datGui.addFolder('Metrics');
-        metrics.add(engine.timing, 'fps').listen();
+        metrics.add(runner, 'fps').listen();
 
         if (engine.metrics.extended) {
-            metrics.add(engine.timing, 'delta').listen();
-            metrics.add(engine.timing, 'correction').listen();
+            metrics.add(runner, 'delta').listen();
+            metrics.add(runner, 'correction').listen();
             metrics.add(engine.metrics, 'bodies').listen();
             metrics.add(engine.metrics, 'collisions').listen();
             metrics.add(engine.metrics, 'pairs').listen();
@@ -255,6 +311,7 @@ var Gui = {};
         controls.add(gui, 'sides', 1, 8).step(1);
         controls.add(gui, 'density', 0.0001, 0.01).step(0.001);
         controls.add(gui, 'friction', 0, 1).step(0.05);
+        controls.add(gui, 'frictionStatic', 0, 10).step(0.1);
         controls.add(gui, 'frictionAir', 0, gui.frictionAir * 10).step(gui.frictionAir / 10);
         controls.add(gui, 'restitution', 0, 1).step(0.1);
         controls.add(gui, 'chamfer', 0, 30).step(2);
@@ -262,11 +319,15 @@ var Gui = {};
         controls.open();
 
         var worldGui = datGui.addFolder('World');
-        worldGui.add(funcs, 'inspect');
         worldGui.add(funcs, 'load');
         worldGui.add(funcs, 'save');
         worldGui.add(funcs, 'clear');
         worldGui.open();
+
+        var toolsGui = datGui.addFolder('Tools');
+        toolsGui.add(funcs, 'inspect');
+        if (window.GIF) toolsGui.add(funcs, 'recordGif');
+        toolsGui.open();
         
         var gravity = worldGui.addFolder('Gravity');
         gravity.add(engine.world.gravity, 'x', -1, 1).step(0.01);
@@ -276,63 +337,30 @@ var Gui = {};
         var physics = datGui.addFolder('Engine');
         physics.add(engine, 'enableSleeping');
 
-        physics.add(engine.broadphase, 'current', ['grid', 'bruteForce'])
-            .onFinishChange(function(value) {
-                Composite.setModified(engine.world, true, false, false);
-            });
-
         physics.add(engine.timing, 'timeScale', 0, 1.2).step(0.05).listen();
         physics.add(engine, 'velocityIterations', 1, 10).step(1);
         physics.add(engine, 'positionIterations', 1, 10).step(1);
-        physics.add(engine, 'enabled');
+        physics.add(runner, 'enabled');
         physics.open();
 
         var render = datGui.addFolder('Render');
-
-        render.add(gui, 'renderer', ['canvas', 'webgl'])
-            .onFinishChange(function(value) { _setRenderer(gui, value); });
-
-        render.add(engine.render.options, 'wireframes');
-        render.add(engine.render.options, 'showDebug');
-        render.add(engine.render.options, 'showPositions');
-        render.add(engine.render.options, 'showBroadphase');
-        render.add(engine.render.options, 'showBounds');
-        render.add(engine.render.options, 'showVelocity');
-        render.add(engine.render.options, 'showCollisions');
-        render.add(engine.render.options, 'showAxes');
-        render.add(engine.render.options, 'showAngleIndicator');
-        render.add(engine.render.options, 'showSleeping');
-        render.add(engine.render.options, 'showIds');
-        render.add(engine.render.options, 'showShadows');
-        render.add(engine.render.options, 'enabled');
+        render.add(gui.render.options, 'wireframes');
+        render.add(gui.render.options, 'showDebug');
+        render.add(gui.render.options, 'showPositions');
+        render.add(gui.render.options, 'showBroadphase');
+        render.add(gui.render.options, 'showBounds');
+        render.add(gui.render.options, 'showVelocity');
+        render.add(gui.render.options, 'showCollisions');
+        render.add(gui.render.options, 'showSeparations');
+        render.add(gui.render.options, 'showAxes');
+        render.add(gui.render.options, 'showAngleIndicator');
+        render.add(gui.render.options, 'showSleeping');
+        render.add(gui.render.options, 'showIds');
+        render.add(gui.render.options, 'showVertexNumbers');
+        render.add(gui.render.options, 'showConvexHulls');
+        render.add(gui.render.options, 'showInternalEdges');
+        render.add(gui.render.options, 'enabled');
         render.open();
-    };
-
-    var _setRenderer = function(gui, rendererName) {
-        var engine = gui.engine,
-            controller;
-
-        if (rendererName === 'canvas')
-            controller = Render;
-
-        if (rendererName === 'webgl')
-            controller = RenderPixi;
-
-        // remove old canvas
-        engine.render.element.removeChild(engine.render.canvas);
-
-        // create new renderer using the same options object
-        var options = engine.render.options;
-
-        engine.render = controller.create({
-            element: engine.render.element,
-            options: options
-        });
-
-        engine.render.options = options;
-
-        // bind the mouse to the new canvas
-        Mouse.setElement(engine.input.mouse, engine.render.canvas);
     };
 
     var _addBody = function(gui) {
@@ -341,6 +369,7 @@ var Gui = {};
         var options = { 
             density: gui.density,
             friction: gui.friction,
+            frictionStatic: gui.frictionStatic,
             frictionAir: gui.frictionAir,
             restitution: gui.restitution
         };
@@ -363,11 +392,27 @@ var Gui = {};
         Engine.clear(engine);
 
         // clear scene graph (if defined in controller)
-        var renderController = engine.render.controller;
+        var renderController = gui.render.controller;
         if (renderController.clear)
-            renderController.clear(engine.render);
+            renderController.clear(gui.render);
 
         Events.trigger(gui, 'clear');
+    };
+
+    var _initGif = function(gui) {
+        if (!window.GIF) {
+            return;
+        }
+
+        var engine = gui.engine,
+            skipFrame = false;
+
+        Matter.Events.on(gui.runner, 'beforeTick', function(event) {
+            if (gui.isRecording && !skipFrame) {
+                gui.gif.addFrame(gui.render.context, { copy: true, delay: 25 });
+            }
+            skipFrame = !skipFrame;
+        });
     };
 
     /*
@@ -429,17 +474,21 @@ var Inspector = {};
      * Creates a new inspector tool and inserts it into the page. Requires keymaster, jQuery, jsTree libraries.
      * @method create
      * @param {engine} engine
+     * @param {runner} runner
+     * @param {render} render
      * @param {object} options
      * @return {inspector} An inspector
      */
-    Inspector.create = function(engine, options) {
+    Inspector.create = function(engine, runner, render, options) {
         if (!jQuery || !$.fn.jstree || !window.key) {
             console.log('Could not create inspector. Check keymaster, jQuery, jsTree libraries are loaded first.');
             return;
         }
 
         var inspector = {
-            engine: engine,
+            engine: null,
+            runner: null,
+            render: null,
             isPaused: false,
             selected: [],
             selectStart: null,
@@ -464,6 +513,13 @@ var Inspector = {};
 
         inspector = Common.extend(inspector, options);
         Inspector.instance = inspector;
+
+        inspector.engine = engine;
+        inspector.runner = runner;
+        inspector.render = render;
+
+        inspector.mouse = Mouse.create(inspector.render.canvas);
+        inspector.mouseConstraint = MouseConstraint.create(engine, { mouse: inspector.mouse });
 
         inspector.serializer = new Resurrect({ prefix: '$', cleanup: true });
         inspector.serializer.parse = inspector.serializer.resurrect;
@@ -808,16 +864,16 @@ var Inspector = {};
     };
 
     var _getMousePosition = function(inspector) {
-        return Vector.add(inspector.engine.input.mouse.position, inspector.offset);
+        return Vector.add(inspector.mouse.position, inspector.offset);
     };
 
     var _initEngineEvents = function(inspector) {
         var engine = inspector.engine,
-            mouse = engine.input.mouse,
+            mouse = inspector.mouse,
             mousePosition = _getMousePosition(inspector),
             controls = inspector.controls;
 
-        Events.on(engine, 'tick', function() {
+        Events.on(inspector.engine, 'beforeUpdate', function() {
             // update mouse position reference
             mousePosition = _getMousePosition(inspector);
 
@@ -873,7 +929,7 @@ var Inspector = {};
             }
 
             // translate mode
-            if (mouse.button === 2 && !mouse.sourceEvents.mousedown && !mouse.sourceEvents.mouseup) {
+            if (mouse.button === 2) {
                 _addBodyClass(inspector, 'ins-cursor-move');
                 _moveSelectedObjects(inspector, mousePosition.x, mousePosition.y);
             } else {
@@ -883,7 +939,7 @@ var Inspector = {};
             inspector.mousePrevPosition = Common.clone(mousePosition);
         });
 
-        Events.on(engine, 'mouseup', function(event) {
+        Events.on(inspector.mouseConstraint, 'mouseup', function(event) {
             // select objects in region if making a region selection
             if (inspector.selectStart !== null) {
                 var selected = Query.region(Composite.allBodies(engine.world), inspector.selectBounds);
@@ -896,9 +952,8 @@ var Inspector = {};
             Events.trigger(inspector, 'selectEnd');
         });
 
-        Events.on(engine, 'mousedown', function(event) {
-            var engine = event.source,
-                bodies = Composite.allBodies(engine.world),
+        Events.on(inspector.mouseConstraint, 'mousedown', function(event) {
+            var bodies = Composite.allBodies(engine.world),
                 constraints = Composite.allConstraints(engine.world),
                 isUnionSelect = _key.shift || _key.control,
                 worldTree = inspector.controls.worldTree.data('jstree'),
@@ -980,9 +1035,9 @@ var Inspector = {};
         });
 
         // render hook
-        Events.on(engine, 'afterRender', function() {
-            var renderController = engine.render.controller,
-                context = engine.render.context;
+        Events.on(inspector.render, 'afterRender', function() {
+            var renderController = inspector.render.controller,
+                context = inspector.render.context;
             if (renderController.inspector)
                 renderController.inspector(inspector, context);
         });
@@ -1065,7 +1120,7 @@ var Inspector = {};
 
     var _updateSelectedMouseDownOffset = function(inspector) {
         var selected = inspector.selected,
-            mouse = inspector.engine.input.mouse,
+            mouse = inspector.mouse,
             mousePosition = _getMousePosition(inspector),
             item,
             data;
@@ -1095,7 +1150,7 @@ var Inspector = {};
 
     var _moveSelectedObjects = function(inspector, x, y) {
         var selected = inspector.selected,
-            mouse = inspector.engine.input.mouse,
+            mouse = inspector.mouse,
             mousePosition = _getMousePosition(inspector),
             item,
             data;
