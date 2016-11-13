@@ -1,12 +1,12 @@
 {
-  "name": "MatterTools",
+  "name": "matter-tools",
   "version": "0.5.0",
   "homepage": "https://github.com/liabru/matter-tools",
   "authors": [
     "Liam Brummitt <liam@brm.io> (http://brm.io/)"
   ],
   "description": "tools for creating, testing and debugging matter.js worlds",
-  "main": "build/matter-tools.min.js",
+  "main": "build/matter-tools.js",
   "keywords": [
     "javascript",
     "canvas",
@@ -23,5 +23,8 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "resurrect-js": "github:skeeto/resurrect-js"
+  }
 }

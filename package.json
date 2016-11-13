@@ -1,14 +1,14 @@
 {
-  "name": "MatterTools",
+  "name": "matter-tools",
   "version": "0.5.0",
   "license": "MIT",
   "homepage": "https://github.com/liabru/matter-tools",
   "author": "Liam Brummitt <liam@brm.io> (http://brm.io/)",
   "description": "tools for creating, testing and debugging matter.js worlds",
-  "main": "build/matter-tools.min.js",
-  "repository":{ 
-    "type" : "git", 
-    "url" : "https://github.com/liabru/matter-tools.git"
+  "main": "build/matter-tools.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/liabru/matter-tools.git"
   },
   "keywords": [
     "javascript",
@@ -19,18 +19,33 @@
     "game engine",
     "rigid body physics"
   ],
-  "devDependencies": {
-    "grunt": "~0.4.2",
-    "grunt-contrib-jshint": "~0.6.3",
-    "grunt-contrib-uglify": "~0.2.7",
-    "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-connect": "~0.6.0",
-    "grunt-contrib-copy": "~0.5.0",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-contrib-cssmin": "~0.9.0"
-  },
   "scripts": {
-    "dev": "npm install && grunt dev",
-    "test": "grunt test"
+    "build": "webpack",
+    "dev": "webpack-dev-server --content-base docs/",
+    "test": "mocha test",
+    "lint": "eslint *.js src/**/*.js test/*.js",
+    "doc": "markdox index.js -o API.md",
+    "release": "npm run lint && npm run test && npm run build && npm run doc"
+  },
+  "dependencies": {
+    "dat.gui": "^0.6.1",
+    "jstree": "^3.3.3",
+    "keymaster": "^1.6.2",
+    "matter-js": "^0.11.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.17.0",
+    "babel-loader": "^6.2.5",
+    "babel-preset-es2015": "^6.16.0",
+    "case": "^1.4.1",
+    "chai": "^3.5.0",
+    "eslint": "^3.9.1",
+    "exports-loader": "^0.6.3",
+    "markdox": "^0.1.10",
+    "mocha": "^3.1.2",
+    "raw-loader": "^0.5.1",
+    "string-replace-loader": "^1.0.5",
+    "webpack": "^1.13.2",
+    "webpack-dev-server": "^1.16.2"
   }
 }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>matter-tools</title>
+    <script src="//code.jquery.com/jquery-3.1.1.js"></script>
+    <script src="/demo/matter.js"></script>
+    <script src="/demo/matter-tools.js"></script>
+    <script src="/examples/basic.js"></script>
+    <style type="text/css">
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      var sourceLinkRoot = 'https://github.com/liabru/matter-tools/blob/master/';
+
+      var demo = MatterTools.Demo.create({
+        toolbar: {
+          title: 'matter-tools',
+          url: 'https://github.com/liabru/matter-tools',
+          reset: true,
+          source: true,
+          inspector: true,
+          tools: true,
+          fullscreen: true,
+          exampleSelect: true
+        },
+        tools: {
+          inspector: true,
+          gui: true
+        },
+        examples: [
+          {
+            name: 'Basic',
+            id: 'basic',
+            init: MatterBasic,
+            sourceLink: sourceLinkRoot + '/docs/examples/basic.js'
+          },
+          {
+            name: 'Basic 2',
+            id: 'basic-2',
+            init: MatterBasic,
+            sourceLink: sourceLinkRoot + '/docs/examples/basic.js'
+          }
+        ]
+      });
+
+      document.body.appendChild(demo.dom.root);
+
+      MatterTools.Demo.start(demo);
+    </script>
+  </body>
+</html>
