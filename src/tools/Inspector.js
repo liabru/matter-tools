@@ -1,61 +1,46 @@
 "use strict";
 
 /**
-* See [Demo.js](https://github.com/liabru/matter-js/blob/master/demo/js/Demo.js) 
-* and [DemoMobile.js](https://github.com/liabru/matter-js/blob/master/demo/js/DemoMobile.js) for usage examples.
-*
-* @class Inspector
-*/
+ * A tool for inspecting worlds.
+ * @module Inspector
+ */
 
-var Inspector = module.exports = {};
+const Inspector = module.exports = {};
+const $ = require('jquery');
+require('../../node_modules/jstree/dist/jstree.min');
+const ToolsCommon = require('./Common');
+const Serializer = require('matter-tools').Serializer;
+const km = require('keymaster');
+const Matter = require('matter-js');
+const Body = Matter.Body;
+const Bounds = Matter.Bounds;
+const Composite = Matter.Composite;
+const Common = Matter.Common;
+const Events = Matter.Events;
+const Mouse = Matter.Mouse;
+const Query = Matter.Query;
+const Vertices = Matter.Vertices;
+const Vector = Matter.Vector;
+const MouseConstraint = Matter.MouseConstraint;
 
-const Gui = require('./Gui.js');
-const jQuery = require('jquery'); 
-const $ = jQuery;
-const Resurrect = require('exports?Resurrect!../../bower_components/resurrect-js/resurrect.js');
-const ToolsCommon = require('../Common.js');
-const jstree = require('jstree');
-var _key = require('keymaster');
-
-const Matter = require('matter-js'),
-  Body = Matter.Body,
-  Bounds = Matter.Bounds,
-  Example = Matter.Example,
-  Engine = Matter.Engine,
-  World = Matter.World,
-  Composite = Matter.Composite,
-  Common = Matter.Common,
-  Bodies = Matter.Bodies,
-  Events = Matter.Events,
-  Mouse = Matter.Mouse,
-  Query = Matter.Query,
-  Vertices = Matter.Vertices,
-  Vector = Matter.Vector,
-  MouseConstraint = Matter.MouseConstraint,
-  Runner = Matter.Runner,
-  Render = Matter.Render;
-
-var _isWebkit = 'WebkitAppearance' in document.documentElement.style,
-  $body;
+var $body;
 
 /**
- * Creates a new inspector tool and inserts it into the page. Requires keymaster, jQuery, jsTree libraries.
- * @method create
+ * Creates an inspector
+ * @function Gui.create
  * @param {engine} engine
- * @param {runner} runner
- * @param {render} render
+ * @param {render} [render]
  * @param {object} options
- * @return {inspector} An inspector
+ * @return {inspector} The created inspector instance.
  */
-Inspector.create = function(engine, runner, render, options) {
-  if (!window.jQuery || !jstree || !_key) {
-    console.log('Could not create inspector. Check keymaster, jQuery, jsTree libraries are loaded first.');
+Inspector.create = function(engine, render, options) {
+  if (!$) {
+    console.log('Could not create inspector, missing jQuery.');
     return;
   }
 
   var inspector = {
     engine: null,
-    runner: null,
     render: null,
     isPaused: false,
     selected: [],
@@ -66,7 +51,6 @@ Inspector.create = function(engine, runner, render, options) {
     offset: { x: 0, y: 0 },
     autoHide: true,
     autoRewind: true,
-    hasTransitions: _isWebkit ? true : false,
     bodyClass: '',
     exportIndent: 0,
     clipboard: [],
@@ -84,15 +68,24 @@ Inspector.create = function(engine, runner, render, options) {
   Inspector.instance = inspector;
 
   inspector.engine = engine;
-  inspector.runner = runner;
   inspector.render = render;
 
-  inspector.mouse = Mouse.create(inspector.render.canvas);
-  inspector.mouseConstraint = MouseConstraint.create(engine, { mouse: inspector.mouse });
+  if (inspector.render) {
+    inspector.mouse = Mouse.create(inspector.render.canvas);
+    inspector.mouseConstraint = MouseConstraint.create(engine, { mouse: inspector.mouse });
+  } else {
+    inspector.mouse = {
+      position: {
+        x: 0,
+        y: 0
+      }
+    };
+  }
 
-  inspector.serializer = new Resurrect({ prefix: '$', cleanup: true });
-  inspector.serializer.parse = inspector.serializer.resurrect;
-  localStorage.removeItem('pauseState');
+  if (Serializer) {
+    inspector.serializer = Serializer.create();
+    localStorage.removeItem('pauseState');
+  }
 
   $body = $('body');
 
@@ -106,7 +99,7 @@ Inspector.create = function(engine, runner, render, options) {
   styles = require('../styles/inspector.css');
   ToolsCommon.injectStyles(styles, 'matter-inspector-style');
 
-  inspector._keyBind = Common.chain(_key, (key) => {
+  inspector.keyBind = Common.chain(km, (key) => {
     inspector.keyBindings.push(key);
   });
 
@@ -120,7 +113,7 @@ Inspector.create = function(engine, runner, render, options) {
 
 /**
  * Destroys the inspector
- * @method destroy
+ * @function Gui.destroy
  * @param {Inspector} inspector
  */
 Inspector.destroy = function(inspector) {
@@ -135,17 +128,19 @@ Inspector.destroy = function(inspector) {
   inspectorElements.forEach(ToolsCommon.domRemove);
 
   inspector.keyBindings.forEach((key) => {
-    _key.unbind(key);
+    km.unbind(key);
   });
 
   Events.off(inspector.engine, 'beforeUpdate', inspector.beforeEngineUpdate);
-  Events.off(inspector.render, 'afterRender', inspector.afterRender);
-  Events.off(inspector.mouseConstraint);
+  
+  if (inspector.render) {
+    Events.off(inspector.render, 'afterRender', inspector.afterRender);
+    Events.off(inspector.mouseConstraint);
+  }
 };
 
 var _initControls = function(inspector) {
-  var engine = inspector.engine,
-    controls = inspector.controls;
+  var controls = inspector.controls;
 
   var $inspectorContainer = $('<div class="ins-container">'),
     $buttonGroup = $('<div class="ins-control-group">'),
@@ -156,8 +151,13 @@ var _initControls = function(inspector) {
     $helpButton = $('<button class="ins-help-button ins-button">Help</button>'),
     $addCompositeButton = $('<button class="ins-add-button ins-button">+</button>');
   
-  $buttonGroup.append($pauseButton, $importButton, $exportButton, $helpButton);
-  $inspectorContainer.prepend($buttonGroup, $searchBox, $addCompositeButton);
+  if (Serializer) {
+    $buttonGroup.append($pauseButton, $importButton, $exportButton, $helpButton);
+  } else {
+    $buttonGroup.append($pauseButton, $helpButton);
+  }
+
+  $inspectorContainer.prepend($searchBox, $addCompositeButton);
   $body.prepend($inspectorContainer);
 
   controls.pauseButton = $pauseButton;
@@ -199,7 +199,7 @@ var _initControls = function(inspector) {
   });
 };
 
-var _showHelp = function(inspector) {
+var _showHelp = function() {
   var help = "Matter Tools\n\n";
 
   help += "Drag nodes in the tree to move them between composites.\n";
@@ -233,38 +233,36 @@ var _showHelp = function(inspector) {
 };
 
 var _initKeybinds = function(inspector) {
-  var engine = inspector.engine,
-    controls = inspector.controls;
-
-  inspector._keyBind('shift+space', function() {
+  inspector.keyBind('shift+space', function() {
     _setPaused(inspector, !inspector.isPaused);
   });
 
-  inspector._keyBind('shift+o', function() {
-    _exportFile(inspector);
-  });
+  if (inspector.serializer) {
+    inspector.keyBind('shift+o', function() {
+      _exportFile(inspector);
+    });
 
-  inspector._keyBind('shift+i', function() {
-    _importFile(inspector);
-  });
+    inspector.keyBind('shift+i', function() {
+      _importFile(inspector);
+    });
+  }
 
-  inspector._keyBind('shift+j', function() {
+  inspector.keyBind('shift+j', function() {
     _showHelp(inspector);
   });
 
-  inspector._keyBind('shift+y', function() {
+  inspector.keyBind('shift+y', function() {
     inspector.autoHide = !inspector.autoHide;
     $body.toggleClass('ins-auto-hide gui-auto-hide', inspector.autoHide);
   });
 
-  inspector._keyBind('shift+r', function() {
+  inspector.keyBind('shift+r', function() {
     inspector.autoRewind = !inspector.autoRewind;
     if (!inspector.autoRewind)
       localStorage.removeItem('pauseState');
   });
 
-  inspector._keyBind('shift+q', function() {
-    var worldTree = inspector.controls.worldTree.data('jstree');
+  inspector.keyBind('shift+q', function() {
     for (var i = 0; i < inspector.selected.length; i++) {
       var object = inspector.selected[i].data;
       if (object.type === 'body' && !object.isStatic)
@@ -272,21 +270,23 @@ var _initKeybinds = function(inspector) {
     }
   });
 
-  inspector._keyBind('del', function() {
+  inspector.keyBind('del', function() {
     _deleteSelectedObjects(inspector);
   });
 
-  inspector._keyBind('backspace', function() {
+  inspector.keyBind('backspace', function() {
     _deleteSelectedObjects(inspector);
   });
 
-  inspector._keyBind('ctrl+c', function() {
-    _copySelectedObjects(inspector);
-  });
+  if (inspector.serializer) {
+    inspector.keyBind('ctrl+c', function() {
+      _copySelectedObjects(inspector);
+    });
 
-  inspector._keyBind('ctrl+v', function() {
-    _pasteSelectedObjects(inspector);
-  });
+    inspector.keyBind('ctrl+v', function() {
+      _pasteSelectedObjects(inspector);
+    });
+  }
 
   // prevent the backspace key from navigating back
   // http://stackoverflow.com/questions/1495219/how-can-i-prevent-the-backspace-key-from-navigating-back
@@ -351,7 +351,7 @@ var _initTree = function(inspector) {
   };
 
   controls.worldTree = $('<div class="ins-world-tree">').jstree(worldTreeOptions);
-  controls.container.prepend(controls.worldTree);
+  controls.container.append(controls.worldTree);
 
   controls.worldTree.on('changed.jstree', function(event, data) {
     var selected = [],
@@ -411,24 +411,21 @@ var _initTree = function(inspector) {
     }
   });
 
-  controls.worldTree.on('dblclick.jstree', function(event, data) {
+  controls.worldTree.on('dblclick.jstree', function() {
     var worldTree = controls.worldTree.data('jstree'),
       selected = worldTree.get_selected();
 
     // select all children of double clicked node
     for (var i = 0; i < selected.length; i++) {
       var nodeId = selected[i],
-        objectType = nodeId.split('_')[0],
-        objectId = nodeId.split('_')[1],
-        worldObject = Composite.get(engine.world, objectId, objectType);
+        objectType = nodeId.split('_')[0];
 
       switch (objectType) {
       case 'composite':
       case 'composites':
       case 'bodies':
       case 'constraints':
-        var node = worldTree.get_node(nodeId),
-          children = worldTree.get_node(nodeId).children;
+        var children = worldTree.get_node(nodeId).children;
 
         for (var j = 0; j < children.length; j++) 
           worldTree.select_node(children[j], false);
@@ -479,7 +476,7 @@ var _initEngineEvents = function(inspector) {
     mousePosition = _getMousePosition(inspector);
 
     var mouseDelta = mousePosition.x - inspector.mousePrevPosition.x,
-      keyDelta = _key.isPressed('up') + _key.isPressed('right') - _key.isPressed('down') - _key.isPressed('left'),
+      keyDelta = km.isPressed('up') + km.isPressed('right') - km.isPressed('down') - km.isPressed('left'),
       delta = mouseDelta + keyDelta;
 
     // update interface when world changes
@@ -497,7 +494,7 @@ var _initEngineEvents = function(inspector) {
     }
 
     // rotate mode
-    if (_key.shift && _key.isPressed('r')) {
+    if (km.shift && km.isPressed('r')) {
       var rotateSpeed = 0.03,
         angle = Math.max(-2, Math.min(2, delta)) * rotateSpeed;
 
@@ -508,7 +505,7 @@ var _initEngineEvents = function(inspector) {
     }
 
     // scale mode
-    if (_key.shift && _key.isPressed('s')) {
+    if (km.shift && km.isPressed('s')) {
       var scaleSpeed = 0.02,
         scale = 1 + Math.max(-2, Math.min(2, delta)) * scaleSpeed;
 
@@ -517,10 +514,10 @@ var _initEngineEvents = function(inspector) {
       var scaleX,
         scaleY;
       
-      if (_key.isPressed('d')) {
+      if (km.isPressed('d')) {
         scaleX = scale;
         scaleY = 1;
-      } else if (_key.isPressed('f')) {
+      } else if (km.isPressed('f')) {
         scaleX = 1;
         scaleY = scale;
       } else {
@@ -545,71 +542,39 @@ var _initEngineEvents = function(inspector) {
 
   Events.on(inspector.engine, 'beforeUpdate', inspector.beforeEngineUpdate);
 
-  Events.on(inspector.mouseConstraint, 'mouseup', function(event) {
-    // select objects in region if making a region selection
-    if (inspector.selectStart !== null) {
-      var selected = Query.region(Composite.allBodies(engine.world), inspector.selectBounds);
-      _setSelectedObjects(inspector, selected);
-    }
-
-    // clear selection region
-    inspector.selectStart = null;
-    inspector.selectEnd = null;
-    Events.trigger(inspector, 'selectEnd');
-  });
-
-  Events.on(inspector.mouseConstraint, 'mousedown', function(event) {
-    var bodies = Composite.allBodies(engine.world),
-      constraints = Composite.allConstraints(engine.world),
-      isUnionSelect = _key.shift || _key.control,
-      worldTree = inspector.controls.worldTree.data('jstree'),
-      i;
-
-    if (mouse.button === 2) {
-      var hasSelected = false;
-
-      for (i = 0; i < bodies.length; i++) {
-        var body = bodies[i];
-
-        if (Bounds.contains(body.bounds, mousePosition) && Vertices.contains(body.vertices, mousePosition)) {
-
-          if (isUnionSelect) {
-            _addSelectedObject(inspector, body);
-          } else {
-            _setSelectedObjects(inspector, [body]);
-          }
-
-          hasSelected = true;
-          break;
-        }
+  if (inspector.mouseConstraint) {
+    Events.on(inspector.mouseConstraint, 'mouseup', function() {
+      // select objects in region if making a region selection
+      if (inspector.selectStart !== null) {
+        var selected = Query.region(Composite.allBodies(engine.world), inspector.selectBounds);
+        _setSelectedObjects(inspector, selected);
       }
 
-      if (!hasSelected) {
-        for (i = 0; i < constraints.length; i++) {
-          var constraint = constraints[i],
-            bodyA = constraint.bodyA,
-            bodyB = constraint.bodyB;
+      // clear selection region
+      inspector.selectStart = null;
+      inspector.selectEnd = null;
+      Events.trigger(inspector, 'selectEnd');
+    });
 
-          if (constraint.label.indexOf('Mouse Constraint') !== -1)
-            continue;
+    Events.on(inspector.mouseConstraint, 'mousedown', function() {
+      var bodies = Composite.allBodies(engine.world),
+        constraints = Composite.allConstraints(engine.world),
+        isUnionSelect = km.shift || km.control,
+        worldTree = inspector.controls.worldTree.data('jstree'),
+        i;
 
-          var pointAWorld = constraint.pointA,
-            pointBWorld = constraint.pointB;
+      if (mouse.button === 2) {
+        var hasSelected = false;
 
-          if (bodyA) pointAWorld = Vector.add(bodyA.position, constraint.pointA);
-          if (bodyB) pointBWorld = Vector.add(bodyB.position, constraint.pointB);
+        for (i = 0; i < bodies.length; i++) {
+          var body = bodies[i];
 
-          if (!pointAWorld || !pointBWorld)
-            continue;
+          if (Bounds.contains(body.bounds, mousePosition) && Vertices.contains(body.vertices, mousePosition)) {
 
-          var distA = Vector.magnitudeSquared(Vector.sub(mousePosition, pointAWorld)),
-            distB = Vector.magnitudeSquared(Vector.sub(mousePosition, pointBWorld));
-
-          if (distA < 100 || distB < 100) {
             if (isUnionSelect) {
-              _addSelectedObject(inspector, constraint);
+              _addSelectedObject(inspector, body);
             } else {
-              _setSelectedObjects(inspector, [constraint]);
+              _setSelectedObjects(inspector, [body]);
             }
 
             hasSelected = true;
@@ -618,36 +583,72 @@ var _initEngineEvents = function(inspector) {
         }
 
         if (!hasSelected) {
-          worldTree.deselect_all(true);
-          _setSelectedObjects(inspector, []);
+          for (i = 0; i < constraints.length; i++) {
+            var constraint = constraints[i],
+              bodyA = constraint.bodyA,
+              bodyB = constraint.bodyB;
 
-          inspector.selectStart = Common.clone(mousePosition);
-          inspector.selectEnd = Common.clone(mousePosition);
-          Bounds.update(inspector.selectBounds, [inspector.selectStart, inspector.selectEnd]);
-        
-          Events.trigger(inspector, 'selectStart');
-        } else {
-          inspector.selectStart = null;
-          inspector.selectEnd = null;
+            if (constraint.label.indexOf('Mouse Constraint') !== -1)
+              continue;
+
+            var pointAWorld = constraint.pointA,
+              pointBWorld = constraint.pointB;
+
+            if (bodyA) pointAWorld = Vector.add(bodyA.position, constraint.pointA);
+            if (bodyB) pointBWorld = Vector.add(bodyB.position, constraint.pointB);
+
+            if (!pointAWorld || !pointBWorld)
+              continue;
+
+            var distA = Vector.magnitudeSquared(Vector.sub(mousePosition, pointAWorld)),
+              distB = Vector.magnitudeSquared(Vector.sub(mousePosition, pointBWorld));
+
+            if (distA < 100 || distB < 100) {
+              if (isUnionSelect) {
+                _addSelectedObject(inspector, constraint);
+              } else {
+                _setSelectedObjects(inspector, [constraint]);
+              }
+
+              hasSelected = true;
+              break;
+            }
+          }
+
+          if (!hasSelected) {
+            worldTree.deselect_all(true);
+            _setSelectedObjects(inspector, []);
+
+            inspector.selectStart = Common.clone(mousePosition);
+            inspector.selectEnd = Common.clone(mousePosition);
+            Bounds.update(inspector.selectBounds, [inspector.selectStart, inspector.selectEnd]);
+          
+            Events.trigger(inspector, 'selectStart');
+          } else {
+            inspector.selectStart = null;
+            inspector.selectEnd = null;
+          }
         }
       }
-    }
 
-    if (mouse.button === 2 && inspector.selected.length > 0) {
-      _addBodyClass(inspector, 'ins-cursor-move');
+      if (mouse.button === 2 && inspector.selected.length > 0) {
+        _addBodyClass(inspector, 'ins-cursor-move');
 
-      _updateSelectedMouseDownOffset(inspector);
-    }
-  });
+        _updateSelectedMouseDownOffset(inspector);
+      }
+    });
+  }
 
-  inspector.afterRender = function() {
-    var renderController = inspector.render.controller,
-      context = inspector.render.context;
-    if (renderController.inspector)
-      renderController.inspector(inspector, context);
-  };
+  if (inspector.render) {
+    inspector.afterRender = function() {
+      var renderController = inspector.render.controller,
+        context = inspector.render.context;
+      if (renderController.inspector)
+        renderController.inspector(inspector, context);
+    };
 
-  Events.on(inspector.render, 'afterRender', inspector.afterRender);
+    Events.on(inspector.render, 'afterRender', inspector.afterRender);
+  }
 };
 
 var _deleteSelectedObjects = function(inspector) {
@@ -699,13 +700,17 @@ var _copySelectedObjects = function(inspector) {
 };
 
 var _pasteSelectedObjects = function(inspector) {
+  if (!inspector.serializer) {
+    return;
+  }
+
   var objects = [],
     worldTree = inspector.controls.worldTree.data('jstree');
 
   // copy objects in world
   for (var i = 0; i < inspector.clipboard.length; i++) {
     var object = inspector.clipboard[i],
-      clone = Gui.clone(inspector.serializer, object);
+      clone = Serializer.clone(inspector.serializer, object);
     Body.translate(clone, { x: 50, y: 50 });
 
     // add the clone to the same composite as original
@@ -724,10 +729,8 @@ var _pasteSelectedObjects = function(inspector) {
   }, 200);
 };
 
-
 var _updateSelectedMouseDownOffset = function(inspector) {
   var selected = inspector.selected,
-    mouse = inspector.mouse,
     mousePosition = _getMousePosition(inspector),
     item,
     data;
@@ -757,8 +760,6 @@ var _updateSelectedMouseDownOffset = function(inspector) {
 
 var _moveSelectedObjects = function(inspector, x, y) {
   var selected = inspector.selected,
-    mouse = inspector.mouse,
-    mousePosition = _getMousePosition(inspector),
     item,
     data;
 
@@ -842,9 +843,9 @@ var _rotateSelectedObjects = function(inspector, angle) {
 
 var _setPaused = function(inspector, isPaused) {
   if (isPaused) {
-    if (inspector.autoRewind) {
+    if (inspector.autoRewind && inspector.serializer) {
       _setSelectedObjects(inspector, []);
-      Gui.loadState(inspector.serializer, inspector.engine, 'pauseState');
+      Serializer.loadState(inspector.serializer, inspector.engine, 'pauseState');
     }
 
     inspector.engine.timing.timeScale = 0;
@@ -853,8 +854,8 @@ var _setPaused = function(inspector, isPaused) {
 
     Events.trigger(inspector, 'paused');
   } else {
-    if (inspector.autoRewind) {
-      Gui.saveState(inspector.serializer, inspector.engine, 'pauseState');
+    if (inspector.autoRewind && inspector.serializer) {
+      Serializer.saveState(inspector.serializer, inspector.engine, 'pauseState');
     }
 
     inspector.engine.timing.timeScale = 1;
@@ -867,7 +868,6 @@ var _setPaused = function(inspector, isPaused) {
 
 var _setSelectedObjects = function(inspector, objects) {
   var worldTree = inspector.controls.worldTree.data('jstree'),
-    selectedItems = [],
     data,
     i;
 
@@ -1044,8 +1044,10 @@ var _addNewComposite = function(inspector) {
 };
 
 var _exportFile = function(inspector) {
-  var engine = inspector.engine,
-    toExport = [];
+  if (!inspector.serializer) {
+    alert('No serializer.');
+    return;
+  }
 
   if (inspector.selected.length === 0) {
     alert('No objects were selected, so export could not be created. Can only export objects that are in the World composite.');
@@ -1077,9 +1079,11 @@ var _exportFile = function(inspector) {
   fileName = fileName.toLowerCase().replace(/[^\w\-]/g, '') + '.json';
 
   // serialise
-  var json = Gui.serialise(inspector.serializer, exportComposite, inspector.exportIndent);
+  var json = Serializer.serialise(inspector.serializer, exportComposite, inspector.exportIndent);
 
   // launch export download
+  var _isWebkit = 'WebkitAppearance' in document.documentElement.style;
+
   if (_isWebkit) {
     var blob = new Blob([json], { type: 'application/json' }),
       anchor = document.createElement('a');
@@ -1095,20 +1099,24 @@ var _exportFile = function(inspector) {
 };
 
 var _importFile = function(inspector) {
-  var engine = inspector.engine,
-    element = document.createElement('div'),
+  if (!inspector.serializer) {
+    alert('No serializer.');
+    return;
+  }
+
+  var element = document.createElement('div'),
     fileInput;
 
   element.innerHTML = '<input type="file">';
   fileInput = element.firstChild;
 
-  fileInput.addEventListener('change', function(e) {
+  fileInput.addEventListener('change', function() {
     var file = fileInput.files[0];
 
     if (file.name.match(/\.(txt|json)$/)) {
       var reader = new FileReader();
 
-      reader.onload = function(e) {
+      reader.onload = function() {
         var importedComposite = inspector.serializer.parse(reader.result);
 
         if (importedComposite) {

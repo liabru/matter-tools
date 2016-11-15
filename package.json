@@ -5,7 +5,7 @@
   "homepage": "https://github.com/liabru/matter-tools",
   "author": "Liam Brummitt <liam@brm.io> (http://brm.io/)",
   "description": "tools for creating, testing and debugging matter.js worlds",
-  "main": "build/matter-tools.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/liabru/matter-tools.git"
@@ -21,14 +21,17 @@
   ],
   "scripts": {
     "build": "webpack",
-    "dev": "webpack-dev-server --content-base docs/",
-    "test": "mocha test",
+    "dev": "npm run build && webpack-dev-server --content-base docs/",
     "lint": "eslint *.js src/**/*.js test/*.js",
-    "doc": "markdox index.js -o API.md",
-    "release": "npm run lint && npm run test && npm run build && npm run doc"
+    "doc": "markdox *.js src/**/*.js -o API.md",
+    "release": "npm version minor -m 'release %s' && npm publish",
+    "preversion": "npm run lint",
+    "version": "npm run build && npm run doc && git add -A build docs API.md",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
     "dat.gui": "^0.6.1",
+    "jquery": "^3.1.1",
     "jstree": "^3.3.3",
     "keymaster": "^1.6.2",
     "matter-js": "^0.11.0"
@@ -43,6 +46,7 @@
     "exports-loader": "^0.6.3",
     "markdox": "^0.1.10",
     "mocha": "^3.1.2",
+    "node-fs-extra": "^0.8.1",
     "raw-loader": "^0.5.1",
     "string-replace-loader": "^1.0.5",
     "webpack": "^1.13.2",

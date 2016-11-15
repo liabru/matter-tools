@@ -1,27 +1,23 @@
 "use strict";
 
+/**
+ * A tool for for running and testing example scenes.
+ * @module Demo
+ */
+
 const Demo = module.exports = {};
-
-const Gui = require('./Gui.js');
-const Inspector = require('./Inspector.js');
-const ToolsCommon = require('../Common.js');
-
-const Matter = require('matter-js'),
-  Body = Matter.Body,
-  Example = Matter.Example,
-  Engine = Matter.Engine,
-  World = Matter.World,
-  Common = Matter.Common,
-  Bodies = Matter.Bodies,
-  Events = Matter.Events,
-  Mouse = Matter.Mouse,
-  MouseConstraint = Matter.MouseConstraint,
-  Runner = Matter.Runner,
-  Render = Matter.Render;
+const Gui = require('matter-tools').Gui;
+const Inspector = require('matter-tools').Inspector;
+const ToolsCommon = require('./Common');
 
 Demo._matterLink = 'http://brm.io/matter-js/';
-Demo._jqueryJsUrl = '//code.jquery.com/jquery-3.1.1.js';
 
+/**
+ * Creates a new demo instance.
+ * See example for options and usage.
+ * @function Demo.create
+ * @param {} options
+ */
 Demo.create = function(options) {
   let demo = Object.assign({
     example: {
@@ -49,12 +45,29 @@ Demo.create = function(options) {
     demo.toolbar.exampleSelect = true;
   }
 
+  if (!Gui) {
+    demo.toolbar.tools = false;
+    demo.tools.gui = false;
+  }
+
+  if (!Inspector) {
+    demo.toolbar.inspector = false;
+    demo.tools.inspector = false;
+  }
+
   demo.dom = Demo._createDom(demo);
   Demo._bindDom(demo);
 
   return demo;
 };
 
+/**
+ * Starts a new demo instance by running the first or given example.
+ * See example for options and usage.
+ * @function Demo.start
+ * @param {demo} demo
+ * @param {string} [initalExampleId] example to start (defaults to first)
+ */
 Demo.start = function(demo, initalExampleId) {
   initalExampleId = initalExampleId || demo.examples[0].id;
 
@@ -65,12 +78,26 @@ Demo.start = function(demo, initalExampleId) {
   Demo.setExampleById(demo, initalExampleId);
 };
 
+/**
+ * Stops the currently running example in the demo.
+ * This requires that the `example.init` function returned 
+ * an object specifiying a `stop` function.
+ * @function Demo.stop
+ * @param {demo} demo
+ */
 Demo.stop = function(demo) {
   if (demo.example && demo.example.instance) {
     demo.example.instance.stop();
   }
 };
 
+/**
+ * Starts the given example by its id. 
+ * Any running example will be stopped.
+ * @function Demo.setExampleById
+ * @param {demo} demo
+ * @param {string} exampleId 
+ */
 Demo.setExampleById = function(demo, exampleId) {
   let example = demo.examples.filter((example) => {
     return example.id === exampleId;
@@ -79,6 +106,13 @@ Demo.setExampleById = function(demo, exampleId) {
   Demo.setExample(demo, example);
 };
 
+/**
+ * Starts the given example.
+ * Any running example will be stopped.
+ * @function Demo.setExample
+ * @param {demo} demo
+ * @param {example} example 
+ */
 Demo.setExample = function(demo, example) {
   if (example) {
     let instance = demo.example.instance;
@@ -95,7 +129,16 @@ Demo.setExample = function(demo, example) {
 
     demo.example.instance = null;
     demo.example = example;
-    demo.example.instance = example.init(demo);
+    demo.example.instance = instance = example.init(demo);
+
+    if (!instance.canvas && instance.render) {
+      instance.canvas = instance.render.canvas;
+    }
+
+    if (instance.canvas) {
+      demo.dom.header.style.maxWidth = instance.canvas.width + 'px';
+      demo.dom.root.appendChild(instance.canvas);
+    }
 
     demo.dom.exampleSelect.value = example.id;
     demo.dom.buttonSource.href = example.sourceLink || demo.url || '#';
@@ -112,6 +155,13 @@ Demo.setExample = function(demo, example) {
   }
 };
 
+/**
+ * Enables or disables the inspector tool.
+ * If `enabled` a new `Inspector` instance will be created and the old one destroyed.
+ * @function Demo.setInspector
+ * @param {demo} demo
+ * @param {bool} enabled
+ */
 Demo.setInspector = function(demo, enabled) {
   if (!enabled) {
     Demo._destroyTools(demo, true, false);
@@ -121,23 +171,22 @@ Demo.setInspector = function(demo, enabled) {
 
   let instance = demo.example.instance;
 
-  if (!instance.engine || !instance.runner || !instance.render) {
-    Matter.Common.warn('matter-demo: example does not expose a Matter.Engine, Matter.Runner or Matter.Render so Inspector can not run.');
-  } else {
-    //Demo._loadTools(() => {
-      Demo._destroyTools(demo, true, false);
+  Demo._destroyTools(demo, true, false);
+  demo.dom.root.classList.toggle('matter-inspect-active', true);
 
-      demo.dom.root.classList.toggle('matter-inspect-active', true);
-
-      demo.tools.inspector = Inspector.create(
-        instance.engine, 
-        instance.runner, 
-        instance.render
-      );
-    //});
-  }
+  demo.tools.inspector = Inspector.create(
+    instance.engine,
+    instance.render
+  );
 };
 
+/**
+ * Enables or disables the Gui tool.
+ * If `enabled` a new `Gui` instance will be created and the old one destroyed.
+ * @function Demo.setGui
+ * @param {demo} demo
+ * @param {bool} enabled
+ */
 Demo.setGui = function(demo, enabled) {
   if (!enabled) {
     Demo._destroyTools(demo, false, true);
@@ -147,68 +196,14 @@ Demo.setGui = function(demo, enabled) {
 
   let instance = demo.example.instance;
 
-  if (!instance.engine || !instance.runner || !instance.render) {
-    Matter.Common.warn('matter-demo: example does not expose a Matter.Engine, Matter.Runner or Matter.Render so Inspector can not run.');
-  } else {
-    //Demo._loadTools(() => {
-      Demo._destroyTools(demo, false, true);
+  Demo._destroyTools(demo, false, true);
+  demo.dom.root.classList.toggle('matter-gui-active', true);
 
-      demo.dom.root.classList.toggle('matter-gui-active', true);
-
-      demo.tools.gui = Gui.create(
-        instance.engine, 
-        instance.runner, 
-        instance.render
-      );
-    //});
-  }
-};
-
-Demo._loadTools = function(callback) {
-  /*let count = 0;
-
-  let checkReady = () => {
-    count += 1;
-
-    if (count === 2) {
-      callback();
-    }
-  };
-
-  let next;
-
-  if (!window.MatterTools) {
-    next = () => {*/
-      /*var matterToolsScript = document.createElement('script');
-      matterToolsScript.src = Demo._matterToolsJsUrl;
-      matterToolsScript.onload = checkReady;
-      document.body.appendChild(matterToolsScript);*/
-
-      //ToolsCommon.injectScript(Demo._matterToolsJsUrl, 'matter-tools-jquery', checkReady);
-
-      /*var matterToolsStyle = document.createElement('link');
-      matterToolsStyle.media = 'all';
-      matterToolsStyle.rel = 'stylesheet';
-      matterToolsStyle.href = Demo._matterToolsCssUrl;
-      matterToolsStyle.onload = checkReady;
-      document.head.appendChild(matterToolsStyle);*/
-    /*};
-  } else {
-    next = callback;
-  }*/
-
-  if (!window.jQuery) {
-    /*var jQueryScript = document.createElement('script');
-    jQueryScript.src = Demo._jqueryJsUrl;
-    jQueryScript.onload = () => {
-      count += 1;
-      next();
-    };
-    document.body.appendChild(jQueryScript);*/
-    ToolsCommon.injectScript(Demo._jqueryJsUrl, 'matter-tools-jquery', callback);
-  } else {
-    callback();
-  }
+  demo.tools.gui = Gui.create(
+    instance.engine, 
+    instance.runner, 
+    instance.render
+  );
 };
 
 Demo._destroyTools = function(demo, destroyInspector, destroyGui) {
@@ -226,7 +221,7 @@ Demo._destroyTools = function(demo, destroyInspector, destroyGui) {
   }
 };
 
-Demo.toggleFullscreen = function(demo) {
+Demo._toggleFullscreen = function(demo) {
   let fullscreenElement = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement;
 
   if (!fullscreenElement) {
@@ -254,38 +249,38 @@ Demo._bindDom = function(demo) {
   var dom = demo.dom;
 
   if (dom.exampleSelect) {
-    dom.exampleSelect.addEventListener('change', function(event) {
+    dom.exampleSelect.addEventListener('change', function() {
       let exampleId = this.options[this.selectedIndex].value;
       Demo.setExampleById(demo, exampleId);
     });
   }
 
   if (dom.buttonReset) {
-    dom.buttonReset.addEventListener('click', function(event) {
+    dom.buttonReset.addEventListener('click', function() {
       Demo.setExample(demo, demo.example);
     });
   }
 
   if (dom.buttonInspect) {
-    dom.buttonInspect.addEventListener('click', function(event) {
+    dom.buttonInspect.addEventListener('click', function() {
       var showInspector = !demo.tools.inspector;
       Demo.setInspector(demo, showInspector);
     });
   }
 
   if (dom.buttonTools) {
-    dom.buttonTools.addEventListener('click', function(event) {
+    dom.buttonTools.addEventListener('click', function() {
       var showGui = !demo.tools.gui;
       Demo.setGui(demo, showGui);
     });
   }
 
   if (dom.buttonFullscreen) {
-    dom.buttonFullscreen.addEventListener('click', function(event) {
-      Demo.toggleFullscreen(demo);
+    dom.buttonFullscreen.addEventListener('click', function() {
+      Demo._toggleFullscreen(demo);
     });
 
-    var fullscreenChange = function(event) {
+    var fullscreenChange = function() {
       var isFullscreen = document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen;
       document.body.classList.toggle('matter-is-fullscreen', isFullscreen);
 
@@ -301,7 +296,7 @@ Demo._bindDom = function(demo) {
 };
 
 Demo._createDom = function(options) {
-  let styles = require("../styles/demo.css");
+  let styles = require('../styles/demo.css');
   ToolsCommon.injectStyles(styles, 'matter-demo-style');
 
   let root = document.createElement('div');
@@ -334,13 +329,13 @@ Demo._createDom = function(options) {
           </a>
         </div>
       </header>
-      <div class="matter-render"></div>
     </div>
   `;
 
   let dom = {
     root: root.firstElementChild,
     title: root.querySelector('.matter-demo-title'),
+    header: root.querySelector('.matter-header'),
     exampleSelect: root.querySelector('.matter-example-select'),
     buttonReset: root.querySelector('.matter-btn-reset'),
     buttonSource: root.querySelector('.matter-btn-source'),

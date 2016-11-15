@@ -1,9 +1,14 @@
 "use strict";
 
 const webpack = require('webpack');
-const fs = require('fs');
+const fs = require('node-fs-extra');
+const path = require('path');
 const pkg = require('./package.json');
 const Case = require('case');
+const uglify = require('uglify-js');
+const glob = require('glob');
+
+const isDevServer = process.argv.join(' ').includes('webpack-dev-server');
 const name = Case.kebab(pkg.name);
 const date = new Date().toISOString().slice(0, 10);
 const author = pkg.author.slice(0, pkg.author.indexOf(' <'));
@@ -11,23 +16,68 @@ const banner = `${name} ${pkg.version} by ${author} ${date}
 ${pkg.homepage}
 License ${pkg.license}`;
 
+let postBuildTasksPlugin = {
+  apply: function(compiler) {
+    if (isDevServer) {
+      return;
+    }
+
+    let buildDir = compiler.options.output.path;
+
+    // minify and rename all output
+    compiler.plugin('after-emit', function() {
+      glob(buildDir + '/*.js', (error, files) => {
+        files.forEach((file) => {
+          if (!file.includes('.min.js')) {
+            var lowerFile = file.toLowerCase();
+
+            fs.writeFileSync(
+              lowerFile.replace(/\.js$/, '.min.js'),
+              uglify.minify(file, {
+                compress: true,
+                output: {
+                  comments: /^\!/
+                }
+              }).code
+            );
+
+            fs.renameSync(file, lowerFile);
+          }
+        });
+
+        // copy libs to demo page
+        fs.copySync(buildDir, 'docs/demo/lib');
+        fs.copySync(
+          path.dirname(require.resolve('matter-js')) + '/matter.min.js',
+          'docs/demo/lib/matter.min.js'
+        );
+      });
+    });
+  }
+};
+
 module.exports = {
   entry: {
-    [name]: './index.js',
-    [name + '.min']: './index.js'
+    Inspector: './src/tools/Inspector',
+    Demo: './src/tools/Demo',
+    Gui: './src/tools/Gui',
+    Serializer: './src/tools/Serializer'
   },
   output: {
-    library: Case.pascal(name),
+    library: [Case.pascal(name), '[name]'],
     path: './build',
-    publicPath: '/demo',
-    filename: '[name].js',
+    publicPath: '/demo/lib',
+    filename: 'matter-tools.[name].js',
     libraryTarget: 'umd'
+  },
+  alias: {
+    '$': 'src/JqueryStub',
+    'jquery': 'src/JqueryStub'
   },
   externals: {
     'matter-js': 'Matter',
     'jquery': 'jQuery',
-    //'dat': 'dat',
-    'gif': 'GIF'
+    'matter-tools': 'MatterTools'
   },
   module: {
     loaders: [
@@ -42,11 +92,12 @@ module.exports = {
         loader: 'exports-loader'
       },
       { 
-        test: /\.css$/, 
+        test: /\.css$/,
         loader: "raw-loader" 
       },
       {
         test: /\.js$/,
+        exclude: /node_modules/,
         loader: 'string-replace',
         query: {
           multiple: [
@@ -58,17 +109,27 @@ module.exports = {
     ]
   },
   plugins: [
-    /*new webpack.optimize.UglifyJsPlugin({
-      include: /\.min\.js$/,
-      minimize: true
-    }),*/
     new webpack.BannerPlugin(banner),
-    { 
-      apply: function() {
-        // copy matter.js for the demo page
-        fs.createReadStream(require.resolve('matter-js'))
-          .pipe(fs.createWriteStream('docs/demo/matter.js'));
+    postBuildTasksPlugin
+  ],
+  devServer: {
+    proxy: {
+      '/demo/lib/matter-tools.gui.js': {
+        target: 'http://localhost:8080',
+        pathRewrite: {'\\.gui' : '.Gui'}
+      },
+      '/demo/lib/matter-tools.demo.js': {
+        target: 'http://localhost:8080',
+        pathRewrite: {'\\.demo' : '.Demo'}
+      },
+      '/demo/lib/matter-tools.inspector.js': {
+        target: 'http://localhost:8080',
+        pathRewrite: {'\\.inspector' : '.Inspector'}
+      },
+      '/demo/lib/matter-tools.serializer.js': {
+        target: 'http://localhost:8080',
+        pathRewrite: {'\\.serializer' : '.Serializer'}
       }
     }
-  ]
+  }
 };

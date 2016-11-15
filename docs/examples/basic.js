@@ -1,4 +1,9 @@
-function MatterBasic(demo) {
+function MatterBasic() {
+  // install plugins
+  Matter.use(
+    'matter-wrap'
+  );
+
   // module aliases
   var Engine = Matter.Engine,
       Runner = Matter.Runner,
@@ -13,60 +18,54 @@ function MatterBasic(demo) {
   var engine = Engine.create();
 
   // create renderer
-  var root = demo.dom.root, // this could be e.g. document.body
-      element = root.querySelector('.matter-render');
-
   var render = Render.create({
-    element: element,
+    element: document.body,
     engine: engine,
     options: {
-      width: Math.min(root.clientWidth, 1024),
-      height: Math.min(root.clientHeight, 1024) - 58,
+      width: Math.min(document.body.clientWidth, 1024),
+      height: Math.min(document.body.clientHeight, 1024) - 60,
       showAngleIndicator: true,
       wireframeBackground: '#0f0f13'
     }
   });
 
+  Render.run(render);
+
   // create runner
   var runner = Runner.create();
-  
   Runner.run(runner, engine);
-  Render.run(render);
 
   // create demo scene
   var world = engine.world;
   world.gravity.scale = 0;
 
-  // create a body with an attractor
-  var attractiveBody = Bodies.circle(
-    render.options.width / 2,
-    render.options.height / 2,
-    50, 
-    {
-    isStatic: true,
-
-    // example of an attractor function that 
-    // returns a force vector that applies to bodyB
-    attractors: [
-      function(bodyA, bodyB) {
-        return {
-          x: (bodyA.position.x - bodyB.position.x) * 1e-6,
-          y: (bodyA.position.y - bodyB.position.y) * 1e-6,
-        };
-      }
-    ]
-  });
-
-  World.add(world, attractiveBody);
-
-  // add some bodies that to be attracted
+  // add some random bodies
   for (var i = 0; i < 150; i += 1) {
     var body = Bodies.polygon(
       Common.random(0, render.options.width), 
       Common.random(0, render.options.height),
       Common.random(1, 5),
-      Common.random() > 0.9 ? Common.random(15, 25) : Common.random(5, 10)
+      Common.random() > 0.9 ? Common.random(15, 25) : Common.random(5, 10),
+      {
+        friction: 0,
+        frictionAir: 0,
+        wrap: {
+          min: {
+            x: 0,
+            y: 0
+          },
+          max: {
+            x: render.canvas.width,
+            y: render.canvas.height
+          }
+        }
+      }
     );
+
+    Body.setVelocity(body, {
+      x: Common.random(-3, 3) + 3, 
+      y: Common.random(-3, 3) + 3
+    });
 
     World.add(world, body);
   }
@@ -78,7 +77,7 @@ function MatterBasic(demo) {
 
   World.add(world, mouseConstraint);
 
-  // return a context for MatterDemo to control
+  // context for MatterTools.Demo
   return {
     engine: engine,
     runner: runner,

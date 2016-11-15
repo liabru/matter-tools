@@ -4,9 +4,9 @@
     "sourceType": "module"
   },
   "rules": {
-    "valid-jsdoc": 1,
+    "valid-jsdoc": 0,
     "no-console": 0,
-    "no-unused-vars": 0,
+    "no-unused-vars": 2,
     "indent": [
       2,
       2

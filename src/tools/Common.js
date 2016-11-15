@@ -1,3 +1,9 @@
+"use strict";
+
+/**
+* @class Common
+*/
+
 const Common = module.exports = {};
 
 Common.injectStyles = function(styles, id) {

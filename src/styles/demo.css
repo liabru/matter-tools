@@ -14,7 +14,14 @@
 
 .matter-demo canvas {
   border-radius: 8px;
-  width: 100%;
+  max-width: 100%;
+  max-height: calc(100% - 50px);
+}
+
+@media screen and (min-width: 900px) and (min-height: 600px) {
+  .matter-demo canvas {
+    max-height: calc(100% - 100px);
+  }
 }
 
 .matter-is-fullscreen .matter-demo {
@@ -36,7 +43,13 @@
 
 @media screen and (min-width: 500px) {
   .matter-header {
-  padding: 10px 30px;
+    padding: 10px 30px 16px 30px;
+  }
+}
+
+@media screen and (min-width: 900px) and (min-height: 600px) {
+  .matter-header {
+    padding: 10px 30px 36px 30px;
   }
 }
 
@@ -71,14 +84,14 @@
 
 @media screen and (min-width: 300px) {
   .matter-header h1 {
-  display: inline;
+    display: inline;
   }
 }
 
 @media screen and (min-width: 600px) {
   .matter-header h1 {
-  width: auto;
-  overflow: visible;
+    width: auto;
+    overflow: visible;
   }
 }
 
@@ -99,7 +112,7 @@
 
 @media screen and (min-width: 500px) {
   .matter-link {
-  transform: none;
+    transform: none;
   }
 }
 
@@ -169,6 +182,7 @@
   border-bottom: 2px solid #3a3a3a;
   border-radius: 0;
   appearance: none;
+  -moz-appearance: none;
   -webkit-appearance: none;
 }
 
@@ -283,10 +297,17 @@
   color: #76F09B;
 }
 
+.ins-container,
+body .dg {
+  display: none;
+}
+
 @media screen and (min-width: 500px) {
+  .ins-container,
+  body .dg,
   .matter-btn-tools,
   .matter-btn-inspect,
   .matter-btn-source {
-  display: block;
+    display: block;
   }
 }
