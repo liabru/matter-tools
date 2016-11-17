@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "build": "webpack",
-    "dev": "npm run build && webpack-dev-server --content-base docs/",
+    "dev": "webpack-dev-server --content-base docs/",
     "lint": "eslint *.js src/**/*.js test/*.js",
     "doc": "markdox *.js src/**/*.js -o API.md",
     "release": "npm version minor -m 'release %s' && npm publish",

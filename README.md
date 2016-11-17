@@ -4,7 +4,7 @@
 
 ## Demo
 
-See the [demo](http://liabru.github.io/matter-tools/demo).
+See the [demo](http://liabru.github.io/matter-tools/).
 
 ## Tools
 
