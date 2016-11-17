@@ -1,7 +1,0 @@
-{
-    "name": "resurrect-js",
-    "version": "1.0.0",
-    "main": "resurrect.js",
-    "description": "Precise serialization beyond JSON.",
-    "license": "Public Domain"
-}
