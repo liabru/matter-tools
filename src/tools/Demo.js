@@ -10,6 +10,8 @@ const Gui = require('matter-tools').Gui;
 const Inspector = require('matter-tools').Inspector;
 const ToolsCommon = require('./Common');
 
+Demo._isIOS = window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
 Demo._matterLink = 'http://brm.io/matter-js/';
 
 /**
@@ -24,6 +26,8 @@ Demo.create = function(options) {
       instance: null
     },
     examples: [],
+    resetOnOrientation: false,
+    inline: false,
     toolbar: {
       title: null,
       url: null,
@@ -45,6 +49,10 @@ Demo.create = function(options) {
     demo.toolbar.exampleSelect = true;
   }
 
+  if (Demo._isIOS) {
+    demo.toolbar.fullscreen = false;
+  }
+
   if (!Gui) {
     demo.toolbar.tools = false;
     demo.tools.gui = false;
@@ -57,6 +65,10 @@ Demo.create = function(options) {
 
   demo.dom = Demo._createDom(demo);
   Demo._bindDom(demo);
+
+  if (options.inline) {
+    demo.dom.root.classList.add('matter-demo-inline');
+  }
 
   return demo;
 };
@@ -89,6 +101,15 @@ Demo.stop = function(demo) {
   if (demo.example && demo.example.instance) {
     demo.example.instance.stop();
   }
+};
+
+/**
+ * Stops and restarts the currently running example.
+ * @function Demo.reset
+ * @param {demo} demo
+ */
+Demo.reset = function(demo) {
+  Demo.setExample(demo, demo.example);
 };
 
 /**
@@ -248,6 +269,14 @@ Demo._toggleFullscreen = function(demo) {
 Demo._bindDom = function(demo) {
   var dom = demo.dom;
 
+  window.addEventListener('orientationchange', function() {
+    setTimeout(() => {
+      if (demo.resetOnOrientation) {
+        Demo.reset(demo);
+      }
+    }, 300);
+  });
+
   if (dom.exampleSelect) {
     dom.exampleSelect.addEventListener('change', function() {
       let exampleId = this.options[this.selectedIndex].value;
@@ -257,7 +286,7 @@ Demo._bindDom = function(demo) {
 
   if (dom.buttonReset) {
     dom.buttonReset.addEventListener('click', function() {
-      Demo.setExample(demo, demo.example);
+      Demo.reset(demo);
     });
   }
 
@@ -307,28 +336,30 @@ Demo._createDom = function(options) {
 
   root.innerHTML = `
     <div class="matter-demo ${options.toolbar.title}">
-      <header class="matter-header">
-        <div class="matter-header-inner">
-          <h1 class="matter-demo-title">
-            <a href="${options.toolbar.url}" target="_blank">${options.toolbar.title} ↗</a>
-          </h1>
-          <div class="matter-toolbar">
-            <div class="matter-select-wrapper">
-              <select class="matter-example-select matter-select">
-                ${exampleOptions}
-              </select>
+      <div class="matter-header-outer">
+        <header class="matter-header">
+          <div class="matter-header-inner">
+            <h1 class="matter-demo-title">
+              <a href="${options.toolbar.url}" target="_blank">${options.toolbar.title} ↗&#xFE0E;</a>
+            </h1>
+            <div class="matter-toolbar">
+              <div class="matter-select-wrapper">
+                <select class="matter-example-select matter-select">
+                  ${exampleOptions}
+                </select>
+              </div>
+              <button class="matter-btn matter-btn-reset" title="Reset">↻&#xFE0E;</button>
+              <a href="#" class="matter-btn matter-btn-source" title="Source" target="_blank">{ }</a>
+              <button class="matter-btn matter-btn-tools" title="Tools">✎&#xFE0E;</button>
+              <button class="matter-btn matter-btn-inspect" title="Inspect">&#8857;&#xFE0E;</button>
+              <button class="matter-btn matter-btn-fullscreen" title="Fullscreen">&#9633;&#xFE0E;</button>
             </div>
-            <button class="matter-btn matter-btn-reset" title="Reset">↻&#xFE0E;</button>
-            <a href="#" class="matter-btn matter-btn-source" title="Source" target="_blank">{ }</a>
-            <button class="matter-btn matter-btn-tools" title="Tools">✎&#xFE0E;</button>
-            <button class="matter-btn matter-btn-inspect" title="Inspect">&#8857;&#xFE0E;</button>
-            <button class="matter-btn matter-btn-fullscreen" title="Fullscreen">&#9633;&#xFE0E;</button>
+            <a class="matter-link" href="${Demo._matterLink}" title="matter.js" target="_blank">
+              <i>▲</i><i>●</i><i>■</i>
+            </a>
           </div>
-          <a class="matter-link" href="${Demo._matterLink}" title="matter.js" target="_blank">
-            <i>▲</i><i>●</i><i>■</i>
-          </a>
-        </div>
-      </header>
+        </header>
+      </div>
     </div>
   `;
 

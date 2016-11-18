@@ -15,11 +15,15 @@
 .matter-demo canvas {
   border-radius: 8px;
   max-width: 100%;
+  max-height: 100%;
+}
+
+.matter-demo.matter-demo-inline canvas {
   max-height: calc(100% - 50px);
 }
 
 @media screen and (min-width: 900px) and (min-height: 600px) {
-  .matter-demo canvas {
+  .matter-demo.matter-demo-inline canvas {
     max-height: calc(100% - 100px);
   }
 }
@@ -33,22 +37,60 @@
   display: none;
 }
 
+.matter-header-outer {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 400ms ease;
+}
+
+.matter-header-outer:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.matter-demo-inline .matter-header-outer {
+  position: static;
+  background: transparent;
+  z-index: 0;
+  width: 100%;
+}
+
 .matter-header {
   width: 100%;
-  padding: 10px 10px;
+  padding: 10px 6px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.matter-demo-inline .matter-header {
+  padding: 10px;
+}
+
+body .ins-container,
+body .dg .dg.main,
+body .dg .dg.main.a {
+  padding-top: 52px;
+}
+
 @media screen and (min-width: 500px) {
   .matter-header {
+    padding: 12px 20px;
+  }
+
+  .matter-demo-inline .matter-header {
     padding: 10px 30px 16px 30px;
   }
 }
 
 @media screen and (min-width: 900px) and (min-height: 600px) {
-  .matter-header {
+  .matter-demo-inline .matter-header {
     padding: 10px 30px 36px 30px;
   }
 }
@@ -179,11 +221,15 @@
   padding: 0 7px;
   margin: 0 0 -6px 0;
   border: 0;
-  border-bottom: 2px solid #3a3a3a;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 0;
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
+}
+
+.matter-demo-inline .matter-select {
+  border-bottom: 2px solid #3a3a3a;
 }
 
 .matter-select:hover {
@@ -217,7 +263,7 @@
 .matter-btn {
   font-family: Helvetica, Arial, sans-serif;
   border: 0;
-  background: #0f0f13;
+  background: rgba(0,0,0,0.1);
   padding: 2px 0 0 0;
   width: 40px;
   height: 33px;
@@ -229,6 +275,10 @@
   color: #c2cad4;
   text-decoration: none;
   text-align: center;
+}
+
+.matter-demo-inline .matter-btn {
+  background: #0f0f13;
 }
 
 .matter-btn:focus {

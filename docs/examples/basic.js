@@ -23,7 +23,7 @@ function MatterBasic() {
     engine: engine,
     options: {
       width: Math.min(document.body.clientWidth, 1024),
-      height: Math.min(document.body.clientHeight, 1024) - 60,
+      height: Math.min(document.body.clientHeight, 1024),
       showAngleIndicator: true,
       wireframeBackground: '#0f0f13'
     }
