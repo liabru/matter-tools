@@ -51,6 +51,14 @@ an object specifiying a `stop` function.
 
 * **demo** *demo* 
 
+## Demo.reset(demo)
+
+Stops and restarts the currently running example.
+
+### Params:
+
+* **demo** *demo* 
+
 ## Demo.setExampleById(demo, exampleId)
 
 Starts the given example by its id. 

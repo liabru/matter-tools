@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.6.0 by Liam Brummitt 2016-11-17
+ * matter-tools 0.7.0 by Liam Brummitt 2016-11-18
  * https://github.com/liabru/matter-tools
  * License MIT
  */
