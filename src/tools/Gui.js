@@ -175,6 +175,7 @@ var _initDatGui = function(gui) {
     worldGui.open();
     
     var gravity = worldGui.addFolder('Gravity');
+    gravity.add(engine.world.gravity, 'scale', 0, 0.001).step(0.0001);
     gravity.add(engine.world.gravity, 'x', -1, 1).step(0.01);
     gravity.add(engine.world.gravity, 'y', -1, 1).step(0.01);
     gravity.open();
