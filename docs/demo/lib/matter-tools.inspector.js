@@ -1,18 +1,18 @@
 /*!
- * matter-tools 0.7.0 by Liam Brummitt 2016-11-18
+ * matter-tools 0.8.0 by Liam Brummitt 2017-01-22
  * https://github.com/liabru/matter-tools
  * License MIT
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("MatterTools"), require("Matter"), require("jQuery"));
+		module.exports = factory(require("Matter"), require("MatterTools"), require("jQuery"));
 	else if(typeof define === 'function' && define.amd)
-		define(["MatterTools", "Matter", "jQuery"], factory);
+		define(["Matter", "MatterTools", "jQuery"], factory);
 	else if(typeof exports === 'object')
-		exports["Inspector"] = factory(require("MatterTools"), require("Matter"), require("jQuery"));
+		exports["Inspector"] = factory(require("Matter"), require("MatterTools"), require("jQuery"));
 	else
-		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Inspector"] = factory(root["MatterTools"], root["Matter"], root["jQuery"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_7__) {
+		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Inspector"] = factory(root["Matter"], root["MatterTools"], root["jQuery"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_7__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -69,10 +69,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Inspector = module.exports = {};
 	var $ = __webpack_require__(7);
 	__webpack_require__(8);
-	var ToolsCommon = __webpack_require__(2);
-	var Serializer = __webpack_require__(1).Serializer;
+	var ToolsCommon = __webpack_require__(3);
+	var Serializer = __webpack_require__(2).Serializer;
 	var km = __webpack_require__(9);
-	var Matter = __webpack_require__(5);
+	var Matter = __webpack_require__(1);
 	var Body = Matter.Body;
 	var Bounds = Matter.Bounds;
 	var Composite = Matter.Composite;
@@ -1252,6 +1252,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports) {
 
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
 	"use strict";
 
 	/**
@@ -1296,14 +1302,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*** EXPORTS FROM exports-loader ***/
 
 /***/ },
-/* 3 */,
 /* 4 */,
-/* 5 */
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
-
-/***/ },
+/* 5 */,
 /* 6 */,
 /* 7 */
 /***/ function(module, exports) {

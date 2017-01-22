@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.7.0 by Liam Brummitt 2016-11-18
+ * matter-tools 0.8.0 by Liam Brummitt 2017-01-22
  * https://github.com/liabru/matter-tools
  * License MIT
  */
@@ -12,7 +12,7 @@
 		exports["Serializer"] = factory(require("Matter"));
 	else
 		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Serializer"] = factory(root["Matter"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_5__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -68,7 +68,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 
 	var Serializer = module.exports = {};
-	var Matter = __webpack_require__(5);
+	var Matter = __webpack_require__(1);
 	var Common = Matter.Common;
 	var Engine = Matter.Engine;
 	var Resurrect = __webpack_require__(12);
@@ -154,10 +154,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 
-/***/ 5:
+/***/ 1:
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
 
 /***/ },
 

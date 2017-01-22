@@ -1,18 +1,18 @@
 /*!
- * matter-tools 0.7.0 by Liam Brummitt 2016-11-18
+ * matter-tools 0.8.0 by Liam Brummitt 2017-01-22
  * https://github.com/liabru/matter-tools
  * License MIT
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("MatterTools"));
+		module.exports = factory(require("Matter"), require("MatterTools"));
 	else if(typeof define === 'function' && define.amd)
-		define(["MatterTools"], factory);
+		define(["Matter", "MatterTools"], factory);
 	else if(typeof exports === 'object')
-		exports["Demo"] = factory(require("MatterTools"));
+		exports["Demo"] = factory(require("Matter"), require("MatterTools"));
 	else
-		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Demo"] = factory(root["MatterTools"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
+		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Demo"] = factory(root["Matter"], root["MatterTools"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_2__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -66,10 +66,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @module Demo
 	 */
 
+	var Matter = __webpack_require__(1);
+	var Common = Matter.Common;
 	var Demo = module.exports = {};
-	var Gui = __webpack_require__(1).Gui;
-	var Inspector = __webpack_require__(1).Inspector;
-	var ToolsCommon = __webpack_require__(2);
+	var Gui = __webpack_require__(2).Gui;
+	var Inspector = __webpack_require__(2).Inspector;
+	var ToolsCommon = __webpack_require__(3);
 
 	Demo._isIOS = window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -170,6 +172,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {demo} demo
 	 */
 	Demo.reset = function (demo) {
+	  Common._nextId = 0;
+	  Common._seed = 0;
+
 	  Demo.setExample(demo, demo.example);
 	};
 
@@ -211,6 +216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    demo.example.instance = null;
 	    demo.example = example;
+
 	    demo.example.instance = instance = example.init(demo);
 
 	    if (!instance.canvas && instance.render) {
@@ -224,16 +230,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    demo.dom.exampleSelect.value = example.id;
 	    demo.dom.buttonSource.href = example.sourceLink || demo.url || '#';
+
+	    setTimeout(function () {
+	      if (demo.tools.inspector) {
+	        Demo.setInspector(demo, true);
+	      }
+
+	      if (demo.tools.gui) {
+	        Demo.setGui(demo, true);
+	      }
+	    }, 500);
 	  } else {
 	    Demo.setExample(demo, demo.examples[0]);
-	  }
-
-	  if (demo.tools.inspector) {
-	    Demo.setInspector(demo, true);
-	  }
-
-	  if (demo.tools.gui) {
-	    Demo.setGui(demo, true);
 	  }
 	};
 
@@ -379,7 +387,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	Demo._createDom = function (options) {
-	  var styles = __webpack_require__(3);
+	  var styles = __webpack_require__(4);
 	  ToolsCommon.injectStyles(styles, 'matter-demo-style');
 
 	  var root = document.createElement('div');
@@ -445,6 +453,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports) {
 
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
 	"use strict";
 
 	/**
@@ -489,7 +503,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*** EXPORTS FROM exports-loader ***/
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	module.exports = "/*\n*\tMatterTools.Demo\n*/\n\n.matter-demo {\n  font-family: Helvetica, Arial, sans-serif;\n  display: flex;\n  background: #14151f;\n  align-items: center;\n  justify-content: center;\n  flex-direction: column;\n  height: 100vh;\n}\n\n.matter-demo canvas {\n  border-radius: 8px;\n  max-width: 100%;\n  max-height: 100%;\n}\n\n.matter-demo.matter-demo-inline canvas {\n  max-height: calc(100% - 50px);\n}\n\n@media screen and (min-width: 900px) and (min-height: 600px) {\n  .matter-demo.matter-demo-inline canvas {\n    max-height: calc(100% - 100px);\n  }\n}\n\n.matter-is-fullscreen .matter-demo {\n  width: 100%;\n}\n\n.matter-is-fullscreen .dg.ac,\n.matter-is-fullscreen .ins-container {\n  display: none;\n}\n\n.matter-header-outer {\n  position: fixed;\n  z-index: 100;\n  top: 0;\n  left: 0;\n  right: 0;\n  background: rgba(0, 0, 0, 0.2);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: background 400ms ease;\n}\n\n.matter-header-outer:hover {\n  background: rgba(0, 0, 0, 0.7);\n}\n\n.matter-demo-inline .matter-header-outer {\n  position: static;\n  background: transparent;\n  z-index: 0;\n  width: 100%;\n}\n\n.matter-header {\n  width: 100%;\n  padding: 10px 6px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.matter-demo-inline .matter-header {\n  padding: 10px;\n}\n\nbody .ins-container,\nbody .dg .dg.main,\nbody .dg .dg.main.a {\n  padding-top: 52px;\n}\n\n@media screen and (min-width: 500px) {\n  .matter-header {\n    padding: 12px 20px;\n  }\n\n  .matter-demo-inline .matter-header {\n    padding: 10px 30px 16px 30px;\n  }\n}\n\n@media screen and (min-width: 900px) and (min-height: 600px) {\n  .matter-demo-inline .matter-header {\n    padding: 10px 30px 36px 30px;\n  }\n}\n\n.matter-header-inner {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  max-width: 960px;\n  width: 100%;\n}\n\n.matter-header h1 {\n  display: none;\n  margin: 0;\n  width: 18px;\n  overflow: hidden;\n}\n\n.matter-header h1 a {\n  color: #f2f2f5;\n  font-size: 15px;\n  font-weight: 400;\n  font-family: Helvetica, Arial, sans-serif;\n  display: block;\n  text-decoration: none;\n  margin: 7px 0 0 0;\n  padding: 0 0 2px 0;\n  border-bottom: 2px solid transparent;\n  white-space: nowrap;\n  float: right;\n}\n\n@media screen and (min-width: 300px) {\n  .matter-header h1 {\n    display: inline;\n  }\n}\n\n@media screen and (min-width: 600px) {\n  .matter-header h1 {\n    width: auto;\n    overflow: visible;\n  }\n}\n\n.btn-home {\n  display: none;\n}\n\n.matter-header h1 a:hover {\n  border-bottom: 2px solid #F5B862;\n}\n\n.matter-link {\n  font-family: Helvetica, Arial, sans-serif;\n  text-decoration: none;\n  line-height: 13px;\n  transform: translate(0, 3px) scale(0.8);\n}\n\n@media screen and (min-width: 500px) {\n  .matter-link {\n    transform: none;\n  }\n}\n\n.matter-link i {\n  transition: transform 400ms ease;\n}\n\n.matter-link:hover i {\n  transition: transform 400ms ease;\n}\n\n.matter-link:hover i:nth-child(1) {\n  transform: rotate(-26deg) translate3d(-4px, -7px, 0);\n}\n\n.matter-link i:nth-child(2) {\n  transform: translate3d(0, 1px, 0);\n}\n\n.matter-link:hover i:nth-child(2) {\n  transition-delay: 80ms;\n  transform: translate3d(3px, -5px, 0);\n}\n\n.matter-link:hover i:nth-child(3) {\n  transition-delay: 180ms;\n  transform: translate3d(9px, 0, 0);\n}\n\n.matter-link i:nth-child(1) {\n  display: inline-block;\n  color: #76F09B;\n  font-size: 30px;\n}\n\n.matter-link i:nth-child(2) {\n  color: #F5B862;\n  font-size: 16px;\n  padding: 0 2px 0 0;\n  display: inline-block;\n}\n\n.matter-link i:nth-child(3) {\n  display: inline-block;\n  color: #F55F5F; \n  font-size: 46px;\n}\n\n.matter-toolbar {\n  flex-grow: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  margin: -6px 0 0 0;\n}\n\n.matter-select {\n  background: transparent;\n  color: #fff;\n  font-size: 14px;\n  height: 30px;\n  width: 100%;\n  outline: none;\n  padding: 0 7px;\n  margin: 0 0 -6px 0;\n  border: 0;\n  border-bottom: 2px solid rgba(0, 0, 0, 0.1);\n  border-radius: 0;\n  appearance: none;\n  -moz-appearance: none;\n  -webkit-appearance: none;\n}\n\n.matter-demo-inline .matter-select {\n  border-bottom: 2px solid #3a3a3a;\n}\n\n.matter-select:hover {\n  border-bottom-color: #F5B862;\n}\n\n.matter-select-wrapper {\n  width: 20%;\n  min-width: 100px;\n  max-width: 200px;\n  position: relative;\n  display: inline-block;\n  margin: 0 6% 0 0;\n}\n\n.matter-select-wrapper:hover:after {\n  color: #fff;\n}\n\n.matter-select-wrapper:after {\n  content: '▾';\n  display: block;\n  pointer-events: none;\n  color: #cecece;\n  font-size: 14px;\n  position: absolute;\n  top: 6px;\n  right: 5px;\n}\n\n.matter-btn {\n  font-family: Helvetica, Arial, sans-serif;\n  border: 0;\n  background: rgba(0,0,0,0.1);\n  padding: 2px 0 0 0;\n  width: 40px;\n  height: 33px;\n  border-radius: 2px;\n  margin: 0 0 -6px 0;\n  display: inline-block;\n  font-size: 16px;\n  line-height: 1;\n  color: #c2cad4;\n  text-decoration: none;\n  text-align: center;\n}\n\n.matter-demo-inline .matter-btn {\n  background: #0f0f13;\n}\n\n.matter-btn:focus {\n  outline: 0;\n}\n\n.matter-btn:hover {\n  transform: translate(0px, -1px);\n}\n\n.matter-btn:active {\n  transform: translate(0px, 1px);\n}\n\n.matter-btn:hover {\n  background: #212a3a;\n}\n\n.matter-btn-reset:active {\n  color: #76F09B;\n}\n\n.matter-btn-tools {\n  display: none;\n  font-size: 15px;\n  padding-right: 3px;\n}\n\n.matter-gui-active .matter-btn-tools {\n  color: #F55F5F;\n}\n\n.matter-btn-inspect {\n  display: none;\n}\n\n.matter-inspect-active .matter-btn-inspect {\n  color: #fff036;\n}\n\n.matter-btn-source {\n  display: none;\n  font-size: 12px;\n  text-align: center;\n  line-height: 31px;\n}\n\n.matter-btn-source:active {\n  color: #F5B862;\n}\n\n.matter-btn-fullscreen {\n  font-size: 20px;\n}\n\n.matter-btn-source:active {\n  color: #F5B862;\n}\n\n.matter-is-fullscreen .matter-btn-tools,\n.matter-is-fullscreen .matter-btn-inspect {\n  display: none;\n}\n\n.matter-is-fullscreen .matter-btn-fullscreen {\n  color: #76F09B;\n}\n\n.ins-container,\nbody .dg {\n  display: none;\n}\n\n@media screen and (min-width: 500px) {\n  .ins-container,\n  body .dg,\n  .matter-btn-tools,\n  .matter-btn-inspect,\n  .matter-btn-source {\n    display: block;\n  }\n}"

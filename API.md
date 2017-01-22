@@ -18,7 +18,7 @@
 
 <!-- Start src/tools/Demo.js -->
 
-## Demo
+## Matter
 
 A tool for for running and testing example scenes.
 
