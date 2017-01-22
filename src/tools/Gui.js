@@ -186,6 +186,7 @@ var _initDatGui = function(gui) {
     physics.add(engine.timing, 'timeScale', 0, 1.2).step(0.05).listen();
     physics.add(engine, 'velocityIterations', 1, 10).step(1);
     physics.add(engine, 'positionIterations', 1, 10).step(1);
+    physics.add(engine, 'constraintIterations', 1, 10).step(1);
 
     if (runner) {
       physics.add(runner, 'enabled');
