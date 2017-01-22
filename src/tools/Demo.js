@@ -5,6 +5,8 @@
  * @module Demo
  */
 
+const Matter = require('matter-js');
+const Common = Matter.Common;
 const Demo = module.exports = {};
 const Gui = require('matter-tools').Gui;
 const Inspector = require('matter-tools').Inspector;
@@ -109,6 +111,9 @@ Demo.stop = function(demo) {
  * @param {demo} demo
  */
 Demo.reset = function(demo) {
+  Common._nextId = 0;
+  Common._seed = 0;
+
   Demo.setExample(demo, demo.example);
 };
 
@@ -150,6 +155,7 @@ Demo.setExample = function(demo, example) {
 
     demo.example.instance = null;
     demo.example = example;
+
     demo.example.instance = instance = example.init(demo);
 
     if (!instance.canvas && instance.render) {
