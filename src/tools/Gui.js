@@ -17,6 +17,7 @@ const Grid = Matter.Grid;
 const World = Matter.World;
 const Bodies = Matter.Bodies;
 const Events = Matter.Events;
+const Composite = Matter.Composite;
 
 /**
  * Creates a Gui
@@ -249,10 +250,28 @@ var _addBody = function(gui) {
 };
 
 var _clear = function(gui) {
-  var engine = gui.engine;
+  var engine = gui.engine,
+      constraints = Composite.allConstraints(engine.world),
+      mouseConstraint = null;
+
+  // find mouse constraints
+  for (var i = 0; i < constraints.length; i += 1) {
+    var constraint = constraints[i];
+
+    // TODO: need a better way than this
+    if (constraint.label === 'Mouse Constraint') {
+      mouseConstraint = constraint;
+      break;
+    }
+  }
   
   World.clear(engine.world, true);
   Engine.clear(engine);
+
+  // add mouse constraint back in
+  if (mouseConstraint) {
+    Composite.add(engine.world, mouseConstraint);
+  }
 
   // clear scene graph (if defined in controller)
   if (gui.render) {
