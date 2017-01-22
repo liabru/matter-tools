@@ -169,16 +169,18 @@ Demo.setExample = function(demo, example) {
 
     demo.dom.exampleSelect.value = example.id;
     demo.dom.buttonSource.href = example.sourceLink || demo.url || '#';
+
+    setTimeout(function() {
+      if (demo.tools.inspector) {
+        Demo.setInspector(demo, true);
+      }
+
+      if (demo.tools.gui) {
+        Demo.setGui(demo, true);
+      }
+    }, 500);
   } else {
     Demo.setExample(demo, demo.examples[0]);
-  }
-
-  if (demo.tools.inspector) {
-    Demo.setInspector(demo, true);
-  }
-
-  if (demo.tools.gui) {
-    Demo.setGui(demo, true);
   }
 };
 

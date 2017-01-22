@@ -251,8 +251,8 @@ var _addBody = function(gui) {
 
 var _clear = function(gui) {
   var engine = gui.engine,
-      constraints = Composite.allConstraints(engine.world),
-      mouseConstraint = null;
+    constraints = Composite.allConstraints(engine.world),
+    mouseConstraint = null;
 
   // find mouse constraints
   for (var i = 0; i < constraints.length; i += 1) {
