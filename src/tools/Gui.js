@@ -197,7 +197,16 @@ var _initDatGui = function(gui) {
 
   if (gui.render) {
     var render = datGui.addFolder('Render');
-    render.add(gui.render.options, 'wireframes');
+
+    render
+      .add(gui.render.options, 'wireframes')
+      .onFinishChange(function(value) {
+        if (!value) {
+          angleIndicatorWidget.setValue(false);
+          axesWidget.setValue(false);
+        }
+      });
+
     render.add(gui.render.options, 'showDebug');
     render.add(gui.render.options, 'showPositions');
     render.add(gui.render.options, 'showBroadphase');
@@ -205,8 +214,8 @@ var _initDatGui = function(gui) {
     render.add(gui.render.options, 'showVelocity');
     render.add(gui.render.options, 'showCollisions');
     render.add(gui.render.options, 'showSeparations');
-    render.add(gui.render.options, 'showAxes');
-    render.add(gui.render.options, 'showAngleIndicator');
+    var axesWidget = render.add(gui.render.options, 'showAxes');
+    var angleIndicatorWidget = render.add(gui.render.options, 'showAngleIndicator');
     render.add(gui.render.options, 'showSleeping');
     render.add(gui.render.options, 'showIds');
     render.add(gui.render.options, 'showVertexNumbers');
