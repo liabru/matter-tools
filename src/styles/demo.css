@@ -228,6 +228,10 @@ body .dg .dg.main.a {
   -webkit-appearance: none;
 }
 
+.prevent-zoom-ios .matter-select {
+  font-size: 16px;
+}
+
 .matter-demo-inline .matter-select {
   border-bottom: 2px solid #3a3a3a;
 }
@@ -258,6 +262,10 @@ body .dg .dg.main.a {
   position: absolute;
   top: 6px;
   right: 5px;
+}
+
+.prevent-zoom-ios .matter-select-wrapper:after {
+  top: 4px;
 }
 
 .matter-btn {

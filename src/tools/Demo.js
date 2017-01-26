@@ -29,6 +29,7 @@ Demo.create = function(options) {
     },
     examples: [],
     resetOnOrientation: false,
+    preventZoom: false,
     inline: false,
     toolbar: {
       title: null,
@@ -285,6 +286,28 @@ Demo._bindDom = function(demo) {
     }, 300);
   });
 
+  if (demo.preventZoom) {
+    document.body.addEventListener('gesturestart', function(event) { 
+      event.preventDefault(); 
+    });
+
+    var allowTap = true,
+      tapTimeout;
+
+    document.body.addEventListener('touchstart', function(event) {
+      if (!allowTap) {
+        event.preventDefault();
+      }
+
+      allowTap = false;
+
+      clearTimeout(tapTimeout);
+      tapTimeout = setTimeout(function() {
+        allowTap = true;
+      }, 500);
+    });
+  }
+
   if (dom.exampleSelect) {
     dom.exampleSelect.addEventListener('change', function() {
       let exampleId = this.options[this.selectedIndex].value;
@@ -342,8 +365,10 @@ Demo._createDom = function(options) {
     return `<option value="${example.id}">${example.name}</option>`;
   }).join(' ');
 
+  var preventZoomClass = options.preventZoom && Demo._isIOS ? 'prevent-zoom-ios' : '';
+
   root.innerHTML = `
-    <div class="matter-demo ${options.toolbar.title}">
+    <div class="matter-demo ${options.toolbar.title} ${preventZoomClass}">
       <div class="matter-header-outer">
         <header class="matter-header">
           <div class="matter-header-inner">
