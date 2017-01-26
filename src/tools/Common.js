@@ -14,7 +14,7 @@ Common.injectStyles = function(styles, id) {
   let root = document.createElement('div');
   root.innerHTML = `<style id="${id}" type="text/css">${styles}</style>`;
 
-  let lastStyle = document.head.querySelector('style:last-child');
+  let lastStyle = document.head.querySelector('style:last-of-type');
   Common.domInsertBefore(root.firstElementChild, lastStyle);
 };
 
