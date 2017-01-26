@@ -200,6 +200,7 @@ body .dg .c .slider {
   background: #252731;
   border-radius: 0;
   box-shadow: none;
+  padding: 0;
 }
 
 body .dg .c .slider:hover {
@@ -209,6 +210,8 @@ body .dg .c .slider:hover {
 body .dg .c .slider-fg {
   background: #32364a;
   border-radius: 0;
+  margin-left: 0;
+  padding-right: 0;
 }
 
 body .dg .c .slider-fg:after {

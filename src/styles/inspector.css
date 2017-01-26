@@ -95,13 +95,13 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 .ins-add-button.ins-button {
-  float: right;
   width: auto;
   height: auto;
   padding: 2px 5px;
-  margin: 2px 29px;
+  margin: 4px 0 0 0;
+  right: 0px;
   min-width: 0;
-  position: relative;
+  position: absolute;
   z-index: 100;
 }
 
