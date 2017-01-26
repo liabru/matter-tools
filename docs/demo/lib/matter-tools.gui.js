@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.9.0 by Liam Brummitt 2017-01-26
+ * matter-tools 0.9.1 by Liam Brummitt 2017-01-26
  * https://github.com/liabru/matter-tools
  * License MIT
  */
@@ -415,7 +415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var root = document.createElement('div');
 	  root.innerHTML = '<style id="' + id + '" type="text/css">' + styles + '</style>';
 
-	  var lastStyle = document.head.querySelector('style:last-child');
+	  var lastStyle = document.head.querySelector('style:last-of-type');
 	  Common.domInsertBefore(root.firstElementChild, lastStyle);
 	};
 
