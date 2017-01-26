@@ -25,6 +25,7 @@
     "lint": "eslint *.js src/**/*.js test/*.js",
     "doc": "markdox *.js src/**/*.js -o API.md",
     "release": "npm version minor -m 'release %s' && npm publish",
+    "release-patch": "npm version patch -m 'release %s' && npm publish",
     "preversion": "npm run lint",
     "version": "npm run build && npm run doc && git add -A build docs API.md",
     "postversion": "git push && git push --tags"
