@@ -18,6 +18,11 @@ License ${pkg.license}`;
 
 let postBuildTasksPlugin = {
   apply: function(compiler) {
+    fs.copySync(
+      path.dirname(require.resolve('matter-js')) + '/matter.min.js',
+      'docs/demo/lib/matter.min.js'
+    );
+
     if (isDevServer) {
       return;
     }
@@ -47,10 +52,6 @@ let postBuildTasksPlugin = {
 
         // copy libs to demo page
         fs.copySync(buildDir, 'docs/demo/lib');
-        fs.copySync(
-          path.dirname(require.resolve('matter-js')) + '/matter.min.js',
-          'docs/demo/lib/matter.min.js'
-        );
       });
     });
   }
