@@ -17,7 +17,6 @@
     <script src="./demo/lib/matter-tools.inspector.js"></script>
     <script src="./demo/lib/matter-tools.demo.js"></script>
     
-    <script src="./demo/lib/matter-wrap.js"></script>
     <script src="./examples/basic.js"></script>
 
     <style type="text/css">
@@ -35,7 +34,13 @@
     <script>
       var sourceLinkRoot = 'https://github.com/liabru/matter-tools/blob/master';
 
-      var demo = MatterTools.Demo.create({
+      MatterTools.Demo.create({
+        inline: false,
+        preventZoom: true,
+        resetOnOrientation: true,
+        startExample: true,
+        appendTo: document.body,
+
         toolbar: {
           title: 'matter-tools',
           url: 'https://github.com/liabru/matter-tools',
@@ -46,32 +51,27 @@
           fullscreen: true,
           exampleSelect: true
         },
+
         tools: {
           inspector: true,
           gui: true
         },
-        inline: false,
-        preventZoom: true,
-        resetOnOrientation: true,
+        
         examples: [
           {
             name: 'Basic',
             id: 'basic',
-            init: MatterBasic,
+            init: Example.basic,
             sourceLink: sourceLinkRoot + '/docs/examples/basic.js'
           },
           {
             name: 'Basic 2',
             id: 'basic-2',
-            init: MatterBasic,
+            init: Example.basic,
             sourceLink: sourceLinkRoot + '/docs/examples/basic.js'
           }
         ]
       });
-
-      document.body.appendChild(demo.dom.root);
-
-      MatterTools.Demo.start(demo);
     </script>
   </body>
 </html>
