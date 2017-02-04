@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.9.1 by Liam Brummitt 2017-01-26
+ * matter-tools 0.10.0 by Liam Brummitt 2017-02-04
  * https://github.com/liabru/matter-tools
  * License MIT
  */
@@ -92,6 +92,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    resetOnOrientation: false,
 	    preventZoom: false,
 	    inline: false,
+	    startExample: true,
+	    appendTo: document.body,
 	    toolbar: {
 	      title: null,
 	      url: null,
@@ -130,8 +132,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  demo.dom = Demo._createDom(demo);
 	  Demo._bindDom(demo);
 
-	  if (options.inline) {
+	  if (demo.inline) {
 	    demo.dom.root.classList.add('matter-demo-inline');
+	  }
+
+	  if (demo.appendTo) {
+	    demo.appendTo.appendChild(demo.dom.root);
+	  }
+
+	  if (demo.startExample) {
+	    Demo.start(demo, demo.startExample);
 	  }
 
 	  return demo;
@@ -145,7 +155,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @param {string} [initalExampleId] example to start (defaults to first)
 	 */
 	Demo.start = function (demo, initalExampleId) {
-	  initalExampleId = initalExampleId || demo.examples[0].id;
+	  initalExampleId = typeof initalExampleId === 'string' ? initalExampleId : demo.examples[0].id;
 
 	  if (window.location.hash.length > 0) {
 	    initalExampleId = window.location.hash.slice(1);
