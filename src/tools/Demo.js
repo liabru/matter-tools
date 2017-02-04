@@ -31,6 +31,8 @@ Demo.create = function(options) {
     resetOnOrientation: false,
     preventZoom: false,
     inline: false,
+    startExample: true,
+    appendTo: document.body,
     toolbar: {
       title: null,
       url: null,
@@ -69,8 +71,16 @@ Demo.create = function(options) {
   demo.dom = Demo._createDom(demo);
   Demo._bindDom(demo);
 
-  if (options.inline) {
+  if (demo.inline) {
     demo.dom.root.classList.add('matter-demo-inline');
+  }
+
+  if (demo.appendTo) {
+    demo.appendTo.appendChild(demo.dom.root);
+  }
+
+  if (demo.startExample) {
+    Demo.start(demo, demo.startExample);
   }
 
   return demo;
@@ -84,7 +94,7 @@ Demo.create = function(options) {
  * @param {string} [initalExampleId] example to start (defaults to first)
  */
 Demo.start = function(demo, initalExampleId) {
-  initalExampleId = initalExampleId || demo.examples[0].id;
+  initalExampleId = typeof initalExampleId === 'string' ? initalExampleId : demo.examples[0].id;
 
   if (window.location.hash.length > 0) {
     initalExampleId = window.location.hash.slice(1);
