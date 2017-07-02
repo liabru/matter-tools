@@ -76,9 +76,24 @@ module.exports = {
     'jquery': 'src/JqueryStub'
   },
   externals: {
-    'matter-js': 'Matter',
-    'jquery': 'jQuery',
-    'matter-tools': 'MatterTools'
+    'matter-js': {
+      commonjs: 'matter-js',
+      commonjs2: 'matter-js',
+      amd: 'matter-js',
+      root: 'Matter'
+    },
+    'jquery': {
+      commonjs: 'jquery',
+      commonjs2: 'jquery',
+      amd: 'jquery',
+      root: 'jQuery'
+    },
+    'matter-tools': {
+      commonjs: 'matter-tools',
+      commonjs2: 'matter-tools',
+      amd: 'matter-tools',
+      root: 'MatterTools'
+    }
   },
   module: {
     loaders: [
