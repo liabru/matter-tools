@@ -21,8 +21,10 @@ body .dg.main {
   height: 100%;
   background: rgb(28, 29, 47);
   position: fixed;
+  overflow-y: scroll;
   top: 0;
   right: 0;
+  padding: 50px 0 0 0;
 }
 
 body .dg.ac {

@@ -31,7 +31,7 @@ Gui.create = function(engine, runner, render) {
   dat.GUI.TEXT_CLOSED = '▲';
   dat.GUI.TEXT_OPEN = '▼';
 
-  var datGui = new dat.GUI();
+  var datGui = new dat.GUI({ autoPlace: false });
 
   var gui = {
     engine: engine,
@@ -110,6 +110,7 @@ Gui.closeAll = function(gui) {
  * @param {gui} gui
  */
 Gui.destroy = function(gui) {
+  gui.datGui.domElement.parentElement.removeChild(gui.datGui.domElement);
   gui.datGui.destroy();
 };
 
@@ -225,6 +226,8 @@ var _initDatGui = function(gui) {
     render.add(gui.render.options, 'enabled');
     render.open();
   }
+
+  document.body.appendChild(gui.datGui.domElement);
 };
 
 var _addBody = function(gui) {
