@@ -270,6 +270,11 @@ body .dg .dg.main.a {
   -webkit-appearance: none;
 }
 
+.matter-select option {
+  background: white;
+  color: black;
+}
+
 .prevent-zoom-ios .matter-select {
   font-size: 16px;
 }
