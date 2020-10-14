@@ -25,6 +25,6 @@
     "tests"
   ],
   "dependencies": {
-    "resurrect-js": "github:skeeto/resurrect-js"
+    "resurrect-js": "git://github.com/skeeto/resurrect-js"
   }
 }

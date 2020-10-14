@@ -31,7 +31,8 @@
     "postversion": "git push && git push --tags"
   },
   "dependencies": {
-    "dat.gui": "^0.6.1",
+    "dat.gui": "^0.7.7",
+    "fs-extra": "^9.0.1",
     "jquery": "^3.1.1",
     "jstree": "^3.3.3",
     "keymaster": "^1.6.2",
@@ -47,7 +48,6 @@
     "exports-loader": "^0.6.3",
     "markdox": "^0.1.10",
     "mocha": "^3.1.2",
-    "node-fs-extra": "^0.8.1",
     "raw-loader": "^0.5.1",
     "string-replace-loader": "^1.0.5",
     "webpack": "^1.13.2",

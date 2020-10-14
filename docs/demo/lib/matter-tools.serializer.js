@@ -1,15 +1,15 @@
 /*!
- * matter-tools 0.11.1 by Liam Brummitt 2017-07-02
+ * matter-tools 0.11.1 by Liam Brummitt 2020-10-14
  * https://github.com/liabru/matter-tools
  * License MIT
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("Matter"));
+		module.exports = factory(require("matter-js"));
 	else if(typeof define === 'function' && define.amd)
-		define(["Matter"], factory);
+		define(["matter-js"], factory);
 	else if(typeof exports === 'object')
-		exports["Serializer"] = factory(require("Matter"));
+		exports["Serializer"] = factory(require("matter-js"));
 	else
 		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Serializer"] = factory(root["Matter"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
@@ -58,7 +58,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ ({
 
 /***/ 0:
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -152,17 +152,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/*** EXPORTS FROM exports-loader ***/
 
-/***/ },
+/***/ }),
 
 /***/ 1:
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
 
-/***/ },
+/***/ }),
 
 /***/ 12:
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -515,11 +515,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * Visit root and all its ancestors, visiting atoms with f.
 	 * @param {*} root
 	 * @param {Function} f
-	 * @param {Function} replacer
 	 * @returns {*} A fresh copy of root to be serialized.
 	 * @method
 	 */
-	Resurrect.prototype.visit = function (root, f, replacer) {
+	Resurrect.prototype.visit = function (root, f) {
 	    if (Resurrect.isAtom(root)) {
 	        return f(root);
 	    } else if (!this.isTagged(root)) {
@@ -528,23 +527,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            copy = [];
 	            root[this.refcode] = this.tag(copy);
 	            for (var i = 0; i < root.length; i++) {
-	                copy.push(this.visit(root[i], f, replacer));
+	                copy.push(this.visit(root[i], f));
 	            }
 	        } else {
 	            /* Object */
 	            copy = Object.create(Object.getPrototypeOf(root));
 	            root[this.refcode] = this.tag(copy);
 	            for (var key in root) {
-	                var value = root[key];
 	                if (root.hasOwnProperty(key)) {
-	                    if (replacer && value !== undefined) {
-	                        // Call replacer like JSON.stringify's replacer
-	                        value = replacer.call(root, key, root[key]);
-	                        if (value === undefined) {
-	                            continue; // Omit from result
-	                        }
-	                    }
-	                    copy[key] = this.visit(value, f, replacer);
+	                    copy[key] = this.visit(root[key], f);
 	                }
 	            }
 	        }
@@ -610,16 +601,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (Resurrect.isFunction(replacer)) {
 	        replacer = this.replacerWrapper(replacer);
 	    } else if (Resurrect.isArray(replacer)) {
-	        var acceptKeys = replacer;
-	        replacer = function replacer(k, v) {
-	            return acceptKeys.indexOf(k) >= 0 ? v : undefined;
-	        };
+	        var codes = [this.prefix, this.refcode, this.origcode, this.buildcode, this.valuecode];
+	        replacer = codes.concat(replacer);
 	    }
 	    if (Resurrect.isAtom(object)) {
 	        return JSON.stringify(this.handleAtom(object), replacer, space);
 	    } else {
 	        this.table = [];
-	        this.visit(object, this.handleAtom.bind(this), replacer);
+	        this.visit(object, this.handleAtom.bind(this));
 	        for (var i = 0; i < this.table.length; i++) {
 	            if (this.cleanup) {
 	                delete this.table[i][this.origcode][this.refcode];
@@ -631,14 +620,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var table = this.table;
 	        this.table = null;
-	        return JSON.stringify(table, null, space);
+	        return JSON.stringify(table, replacer, space);
 	    }
 	};
 
 	/**
 	 * Restore the __proto__ of the given object to the proper value.
 	 * @param {Object} object
-	 * @returns {Object} Its argument, or a copy, with the prototype restored.
+	 * @returns {Object} Its argument.
 	 * @method
 	 */
 	Resurrect.prototype.fixPrototype = function (object) {
@@ -710,7 +699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*** EXPORTS FROM exports-loader ***/
 	module.exports = Resurrect;
 
-/***/ }
+/***/ })
 
 /******/ })
 });

@@ -1,7 +1,7 @@
 "use strict";
 
 const webpack = require('webpack');
-const fs = require('node-fs-extra');
+const fs = require('fs-extra');
 const path = require('path');
 const pkg = require('./package.json');
 const Case = require('case');
@@ -19,7 +19,7 @@ License ${pkg.license}`;
 let postBuildTasksPlugin = {
   apply: function(compiler) {
     fs.copySync(
-      path.dirname(require.resolve('matter-js')) + '/matter.min.js',
+      path.resolve(path.dirname(require.resolve('matter-js')), 'matter.min.js'),
       'docs/demo/lib/matter.min.js'
     );
 
