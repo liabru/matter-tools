@@ -1,151 +1,106 @@
 "use strict";
 
 const webpack = require('webpack');
-const fs = require('node-fs-extra');
 const path = require('path');
 const pkg = require('./package.json');
+const fs = require('fs');
+const execSync = require('child_process').execSync;
 const Case = require('case');
-const uglify = require('uglify-js');
-const glob = require('glob');
 
-const isDevServer = process.argv.join(' ').includes('webpack-dev-server');
-const name = Case.kebab(pkg.name);
-const date = new Date().toISOString().slice(0, 10);
-const author = pkg.author.slice(0, pkg.author.indexOf(' <'));
-const banner = `${name} ${pkg.version} by ${author} ${date}
-${pkg.homepage}
-License ${pkg.license}`;
+module.exports = (env = {}) => {
+  const minimize = env.MINIMIZE || false;
+  const alpha = env.ALPHA || false;
+  const maxSize = 512 * 1024;
+  const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+  const version = !alpha ? pkg.version : `${pkg.version}-alpha+${commitHash}`;
+  const license = fs.readFileSync('LICENSE', 'utf8');
+  const date = new Date().toISOString().slice(0, 10);
+  const name = pkg.name;
+  const alphaInfo = 'Experimental pre-release build.\n  ';
+  
+  const banner = 
+`${pkg.name} ${version} by @liabru ${date}
+${alpha ? alphaInfo : ''}${pkg.homepage}
+License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
 
-let postBuildTasksPlugin = {
-  apply: function(compiler) {
-    fs.copySync(
-      path.dirname(require.resolve('matter-js')) + '/matter.min.js',
-      'docs/demo/lib/matter.min.js'
-    );
-
-    if (isDevServer) {
-      return;
-    }
-
-    let buildDir = compiler.options.output.path;
-
-    // minify and rename all output
-    compiler.plugin('after-emit', function() {
-      glob(buildDir + '/*.js', (error, files) => {
-        files.forEach((file) => {
-          if (!file.includes('.min.js')) {
-            var lowerFile = file.toLowerCase();
-
-            fs.writeFileSync(
-              lowerFile.replace(/\.js$/, '.min.js'),
-              uglify.minify(file, {
-                compress: true,
-                output: {
-                  comments: /^\!/
-                }
-              }).code
-            );
-
-            fs.renameSync(file, lowerFile);
-          }
-        });
-
-        // copy libs to demo page
-        fs.copySync(buildDir, 'docs/demo/lib');
-      });
-    });
-  }
-};
-
-module.exports = {
-  entry: {
-    Inspector: './src/tools/Inspector',
-    Demo: './src/tools/Demo',
-    Gui: './src/tools/Gui',
-    Serializer: './src/tools/Serializer'
-  },
-  output: {
-    library: [Case.pascal(name), '[name]'],
-    path: './build',
-    publicPath: '/demo/lib',
-    filename: 'matter-tools.[name].js',
-    libraryTarget: 'umd'
-  },
-  alias: {
-    '$': 'src/JqueryStub',
-    'jquery': 'src/JqueryStub'
-  },
-  externals: {
-    'matter-js': {
-      commonjs: 'matter-js',
-      commonjs2: 'matter-js',
-      amd: 'matter-js',
-      root: 'Matter'
+  return {
+    entry: {
+      Inspector: './src/tools/Inspector',
+      Demo: './src/tools/Demo',
+      Gui: './src/tools/Gui',
+      Serializer: './src/tools/Serializer'
     },
-    'jquery': {
-      commonjs: 'jquery',
-      commonjs2: 'jquery',
-      amd: 'jquery',
-      root: 'jQuery'
+    output: {
+      library: ['MatterTools', '[name]'],
+      path: './build',
+      publicPath: '/demo/lib',
+      libraryTarget: 'umd',
+      umdNamedDefine: true,
+      globalObject: 'this',
+      path: path.resolve(__dirname, './build'),
+      filename: params => `matter-tools.${Case.camel(params.chunk.name)}${minimize ? '.min' : ''}.js`
     },
-    'matter-tools': {
-      commonjs: 'matter-tools',
-      commonjs2: 'matter-tools',
-      amd: 'matter-tools',
-      root: 'MatterTools'
-    }
-  },
-  module: {
-    loaders: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'babel-loader'
+    module: {
+      rules: [
+        {
+          test: /\.css$/i,
+          use: [
+            {
+              loader: 'raw-loader',
+              options: {
+              esModule: false,
+              },
+            },
+          ],
+        }      
+      ]
+    },
+    optimization: { minimize },
+    performance: {
+      maxEntrypointSize: maxSize,
+      maxAssetSize: maxSize
+    },
+    plugins: [
+      new webpack.BannerPlugin(banner),
+      new webpack.DefinePlugin({
+        '%NAME%': name,
+        '%VERSION%': version
+      })
+    ],
+    resolve: {
+      alias: {
+        jquery: 'jquery/dist/jquery.min'
+      }
+    },
+    externals: {
+      'matter-js': {
+        commonjs: 'matter-js',
+        commonjs2: 'matter-js',
+        amd: 'matter-js',
+        root: 'Matter'
       },
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'exports-loader'
-      },
-      { 
-        test: /\.css$/,
-        loader: "raw-loader" 
-      },
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        loader: 'string-replace',
-        query: {
-          multiple: [
-            { search: '%NAME%', replace: name },
-            { search: '%VERSION%', replace: pkg.version }
-          ]
+      'matter-tools': {
+        commonjs: 'matter-tools',
+        commonjs2: 'matter-tools',
+        amd: 'matter-tools',
+        root: 'MatterTools'
+      }
+    },
+    devServer: {
+      open: true,
+      openPage: '',
+      compress: true,
+      port: 8080,
+      contentBase: [
+        path.resolve(__dirname, './docs'),
+        path.resolve(__dirname, './node_modules/matter-js/build')
+      ],
+      proxy: {
+        '/demo/lib/matter.min.js': {
+          target: 'http://localhost:8080/',
+          pathRewrite: { '^/demo/lib/' : '/' }
         }
       }
-    ]
-  },
-  plugins: [
-    new webpack.BannerPlugin(banner),
-    postBuildTasksPlugin
-  ],
-  devServer: {
-    proxy: {
-      '/demo/lib/matter-tools.gui.js': {
-        target: 'http://localhost:8080',
-        pathRewrite: {'\\.gui' : '.Gui'}
-      },
-      '/demo/lib/matter-tools.demo.js': {
-        target: 'http://localhost:8080',
-        pathRewrite: {'\\.demo' : '.Demo'}
-      },
-      '/demo/lib/matter-tools.inspector.js': {
-        target: 'http://localhost:8080',
-        pathRewrite: {'\\.inspector' : '.Inspector'}
-      },
-      '/demo/lib/matter-tools.serializer.js': {
-        target: 'http://localhost:8080',
-        pathRewrite: {'\\.serializer' : '.Serializer'}
-      }
     }
-  }
+  };
 };
