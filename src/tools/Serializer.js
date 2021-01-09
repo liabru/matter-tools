@@ -6,10 +6,12 @@
  */
 
 const Serializer = module.exports = {};
+
+const Resurrect = require('../../libs/resurrect-js/resurrect');
+
 const Matter = require('matter-js');
 const Common = Matter.Common;
 const Engine = Matter.Engine;
-const Resurrect = require('exports?Resurrect!../../bower_components/resurrect-js/resurrect');
 
 /**
  * Creates a serializer.

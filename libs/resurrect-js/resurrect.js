@@ -102,6 +102,8 @@ function Resurrect(options) {
     this.valuecode = this.prefix + 'v';
 }
 
+module.exports = Resurrect;
+
 /**
  * Portable access to the global object (window, global).
  * Uses indirect eval.
