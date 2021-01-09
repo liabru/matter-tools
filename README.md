@@ -8,27 +8,41 @@ See the [demo](http://liabru.github.io/matter-tools/).
 
 ## Tools
 
-There are three tools which can each be used together or separately:
+- `MatterTools.Demo` for running and testing examples
+- `MatterTools.Gui` for experimenting with engine properties
+- `MatterTools.Inspector` for inspecting composites, bodies and constraints
+- `MatterTools.Serializer` for saving and loading state (experimental)
 
-- `MatterTools.Demo` for running and testing example scenes
-- `MatterTools.Gui` for making changes to engine properties
-- `MatterTools.Inspector` for inspecting worlds
+Each tool can be used independently as needed.
 
 ## Install
 
-You can download separate builds for each tool and load them:
-
-- [MatterTools.Demo](https://github.com/liabru/matter-tools/blob/master/build/matter-tools.demo.js)
-- [MatterTools.Gui](https://github.com/liabru/matter-tools/blob/master/build/matter-tools.gui.js)
-- [MatterTools.Inspector](https://github.com/liabru/matter-tools/blob/master/build/matter-tools.inspector.js) (requires jQuery)
-
-Alternatively you can install through npm:
+You can install using [npm](https://www.npmjs.com/):
 
     npm install matter-tools
 
+### Bundles
+
+Alternatively the following split bundle builds are provided for convenience:
+
+- [build/matter-tools.demo.js](https://github.com/liabru/matter-tools/blob/master/build)
+- [build/matter-tools.gui.js](https://github.com/liabru/matter-tools/blob/master/build) (bundles [dat.gui](https://github.com/dataarts/dat.gui))
+- [build/matter-tools.inspector.js](https://github.com/liabru/matter-tools/blob/master/build) (bundles [keymaster](https://github.com/madrobby/keymaster), [jquery](https://github.com/jquery/jquery), [jstree](https://github.com/vakata/jstree))
+- [build/matter-tools.serializer.js](https://github.com/liabru/matter-tools/blob/master/build) (bundles [resurrect-js](https://github.com/skeeto/resurrect-js))
+
+See the section below regarding license.
+
 ## Usage
 
-See the [demo source](https://github.com/liabru/matter-tools/blob/master/docs/demo/index.html) 
-for an example of using `MatterTools.Demo` which also integrates the inspector and the gui tools.
+See the [demo source](https://github.com/liabru/matter-tools/tree/master/docs) 
+for a usage example.
 
-See the [API docs](https://github.com/liabru/matter-tools/blob/master/API.md) for more information.
+## Documentation
+
+See the [API docs](https://github.com/liabru/matter-tools/blob/master/API.md) for documentation.
+
+## License
+
+`matter-tools` is released under MIT see [LICENSE](https://github.com/liabru/matter-tools/blob/master/LICENSE)
+
+Dependencies are used under their own individual respective licenses, consult their documentation for information.
