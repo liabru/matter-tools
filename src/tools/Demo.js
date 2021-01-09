@@ -5,15 +5,16 @@
  * @module Demo
  */
 
-const Matter = require('matter-js');
-const Common = Matter.Common;
 const Demo = module.exports = {};
+
 const Gui = require('matter-tools').Gui;
 const Inspector = require('matter-tools').Inspector;
 const ToolsCommon = require('./Common');
 
-Demo._isIOS = window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const Matter = require('matter-js');
+const Common = Matter.Common;
 
+Demo._isIOS = window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 Demo._matterLink = 'http://brm.io/matter-js/';
 
 /**

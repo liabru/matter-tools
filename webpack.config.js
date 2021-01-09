@@ -10,7 +10,7 @@ const Case = require('case');
 module.exports = (env = {}) => {
   const minimize = env.MINIMIZE || false;
   const alpha = env.ALPHA || false;
-  const maxSize = 512 * 1024;
+  const maxSize = 350 * 1024;
   const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
   const version = !alpha ? pkg.version : `${pkg.version}-alpha+${commitHash}`;
   const license = fs.readFileSync('LICENSE', 'utf8');
@@ -69,7 +69,9 @@ License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
     ],
     resolve: {
       alias: {
-        jquery: 'jquery/dist/jquery.min'
+        'jquery': 'jquery/dist/jquery.min',
+        'jstree': 'jstree/dist/jstree.min',
+        'dat.gui': 'dat.gui/build/dat.gui.min'
       }
     },
     externals: {

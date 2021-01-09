@@ -6,11 +6,14 @@
  */
 
 const Inspector = module.exports = {};
+
+const km = require('keymaster');
 const $ = require('jquery');
-require('../../node_modules/jstree/dist/jstree.min');
+require('jstree');
+
 const ToolsCommon = require('./Common');
 const Serializer = require('matter-tools').Serializer;
-const km = require('keymaster');
+
 const Matter = require('matter-js');
 const Body = Matter.Body;
 const Bounds = Matter.Bounds;
@@ -34,11 +37,6 @@ var $body;
  * @return {inspector} The created inspector instance.
  */
 Inspector.create = function(engine, render, options) {
-  if (!$) {
-    console.log('Could not create inspector, missing jQuery.');
-    return;
-  }
-
   var inspector = {
     engine: null,
     render: null,
