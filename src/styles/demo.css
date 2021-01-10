@@ -251,6 +251,11 @@
   user-select: none;
 }
 
+.matter-select option {
+  background: #fff;
+  color: #000;
+}
+
 .matter-select-wrapper {
   width: 100%;
   min-width: 100px;
