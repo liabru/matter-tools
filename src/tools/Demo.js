@@ -31,7 +31,7 @@ Demo.create = function(options) {
     examples: [],
     resetOnOrientation: false,
     preventZoom: false,
-    inline: false,
+    fullPage: false,
     startExample: true,
     appendTo: document.body,
     toolbar: {
@@ -73,7 +73,7 @@ Demo.create = function(options) {
   demo.dom = Demo._createDom(demo);
   Demo._bindDom(demo);
 
-  if (demo.inline) {
+  if (!demo.fullPage && demo.inline !== false) {
     demo.dom.root.classList.add('matter-demo-inline');
   }
 
