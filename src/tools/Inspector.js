@@ -147,7 +147,7 @@ var _initControls = function(inspector) {
     $exportButton = $('<button class="ins-export-button ins-button">Export</button>'),
     $pauseButton = $('<button class="ins-pause-button ins-button">Pause</button>'),
     $helpButton = $('<button class="ins-help-button ins-button">Help</button>'),
-    $addCompositeButton = $('<button class="ins-add-button ins-button">+</button>');
+    $addCompositeButton = $('<button aria-label="Add composite body" title="Add composite body" class="ins-add-button ins-button">+</button>');
   
   if (Serializer) {
     $buttonGroup.append($pauseButton, $importButton, $exportButton, $helpButton);
