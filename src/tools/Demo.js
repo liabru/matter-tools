@@ -15,7 +15,7 @@ const Matter = require('matter-js');
 const Common = Matter.Common;
 
 Demo._isIOS = window.navigator && /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-Demo._matterLink = 'http://brm.io/matter-js/';
+Demo._matterLink = 'https://brm.io/matter-js/';
 
 /**
  * Creates a new demo instance.
