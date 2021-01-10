@@ -1,15 +1,5 @@
 
 
-<!-- Start index.js -->
-
-## exports
-
-<!-- End index.js -->
-
-<!-- Start webpack.config.js -->
-
-<!-- End webpack.config.js -->
-
 <!-- Start src/tools/Common.js -->
 
 ## Common
@@ -18,7 +8,7 @@
 
 <!-- Start src/tools/Demo.js -->
 
-## Matter
+## Demo
 
 A tool for for running and testing example scenes.
 
