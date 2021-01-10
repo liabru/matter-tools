@@ -313,7 +313,8 @@ var _initTree = function(inspector) {
 
   var worldTreeOptions = {
     'core': {
-      'check_callback': true
+      'check_callback': true,
+      'animation': false
     },
     'dnd': {
       'copy': false
