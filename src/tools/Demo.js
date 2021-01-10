@@ -395,7 +395,7 @@ Demo._createDom = function(options) {
             </h1>
             <div class="matter-toolbar">
               <div class="matter-select-wrapper">
-                <select class="matter-example-select matter-select">
+                <select aria-label="Select example" title="Select example" class="matter-example-select matter-select">
                   ${exampleOptions}
                 </select>
                 <svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
