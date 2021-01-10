@@ -16,16 +16,30 @@ body .dg .title {
 
 body .dg.main {
   z-index: 10;
-  -webkit-box-shadow: 0 0 30px rgba(0,0,0,0.2);
-          box-shadow: 0 0 30px rgba(0,0,0,0.2);
+  box-shadow:
+    0 0px 1.6px rgba(0, 0, 0, 0.025),
+    0 0px 3.9px rgba(0, 0, 0, 0.036),
+    0 0px 7.4px rgba(0, 0, 0, 0.045),
+    0 0px 13.2px rgba(0, 0, 0, 0.054),
+    0 0px 24.7px rgba(0, 0, 0, 0.065),
+    0 0px 60px rgba(0, 0, 0, 0.09)
+  ;
   height: 100%;
-  background: rgb(28, 29, 47);
+  background: #14151f;
   position: fixed;
   overflow-y: scroll;
   top: 0;
   right: 0;
   padding: 50px 0 0 0;
 }
+
+body .dg.main,
+body .dg.main * {
+  box-sizing: border-box;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} 
 
 body .dg.ac {
   position: static;
@@ -35,53 +49,34 @@ body .dg.ac {
   right: inherit;
 }
 
-@media only screen and (max-width : 1500px) {
-  body .dg.main {
-    -webkit-transform: translate(230px, 0);
-        -ms-transform: translate(230px, 0);
-            transform: translate(230px, 0);
+@keyframes gui-start-open {
+  0%, 80% {
+    transform: translate(0, 0);
   }
+  100% {
+    transform: translate(230px, 0);
+  }
+}
 
+body .dg.main {
+  transform: translate(230px, 0);
+  transition: transform ease;
+  transition-delay: 2000ms;
+  transition-duration: 300ms;
+  animation: gui-start-open 2000ms;
+}
+
+body .dg.main:hover {
+  transform: translate(0, 0);
+  transition-delay: 0ms;
+  transition-duration: 400ms;
+}
+
+@media only screen and (min-width : 1300px) {
+  body .dg.main,
   body .dg.main:hover {
-    -webkit-transform: translate(0, 0);
-        -ms-transform: translate(0, 0);
-            transform: translate(0, 0);
-  }
-
-  body .dg.main {
-    -webkit-transition: transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        -o-transition: transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        -webkit-transition: -webkit-transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        transition: -webkit-transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        transition: transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        transition: transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415), -webkit-transform 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
-
-    -webkit-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        -o-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);
-    
-    -o-transition-delay: 2s;
-    
-       transition-delay: 2s;
-    -webkit-transition-delay: 2s;
-  }
-
-  body .dg.main:hover {
-    -webkit-transition: transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        -o-transition: transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        -webkit-transition: -webkit-transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        transition: -webkit-transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        transition: transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        transition: transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835), -webkit-transform 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
-
-    -webkit-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        -o-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);
-
-    -o-transition-delay: 0;
-
-       transition-delay: 0;
-    -webkit-transition-delay: 0;
+    animation: none;
+    transform: translate(0, 0);
   }
 }
 
@@ -103,12 +98,13 @@ body .dg.main::-webkit-scrollbar-thumb {
 }
  
 body .dg {
-  color: #9196ad;
+  color: #6d6d7d;
   text-shadow: none !important;
+  font-size: 12px;
 }
 
 body .dg li:not(.folder) {
-  height: 28px;
+  height: 30px;
   background: #1c1c25;
   border-bottom: 0px;
   padding: 0 0 0 12px;
@@ -120,18 +116,22 @@ body .dg li.save-row .button {
 
 body .dg li.title {
   padding-left: 22px;
-  color: #6f7388;
+  color: #6a6977;
   border-bottom: 1px solid #29292d;
   background: #0d0f1b url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 10px 10px no-repeat;
 }
 
+body .dg li.title:hover {
+  color: #9494a2;
+}
+
 body .dg .cr.boolean:hover {
-  background: #232431;
+  background: #20212b;
 }
 
 body .dg .cr.function {
   background: #262731;
-  color: #6d7082;
+  color: #636371;
   border-bottom: 1px solid #222535;
   border-top: 1px solid #3c3e48;
 }
@@ -161,10 +161,11 @@ body .dg .c select,
 body .dg .c input[type=text],
 body .dg .cr.number input[type=text] {
   text-align: right;
-  background: #191a23;
+  background: transparent;
   color: #686c7b;
   border: 0;
-  font-size: 10px;
+  border-radius: 2px;
+  overflow: hidden;
 }
 
 body .dg .cr.number,
@@ -178,32 +179,32 @@ body .dg .c select:focus {
   width: 88px;
   outline: 0;
 }
- 
+
 body .dg .c input[type=text]:hover {
-  background: #1c1d2f;
+  background: #1e1f29;
 }
  
 body .dg .c input[type=text]:focus {
-  background: #1c1d2f;
+  background: #1e1f29;
   color: #fff;
 }
 
 body .dg .c input[type=checkbox] {
-  margin-top: 9px;
+  margin-top: 11px;
   border: none;
-  border-radius: 3px;
+  border-radius: 50%;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   background: #35363e;
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   float: right;
 }
 
 body .dg .c input[type=checkbox]:checked {
-  background: #5b5e6b;
+  background: #848aa2;
 }
 
 body .dg .c input[type=checkbox]:focus {
@@ -211,11 +212,12 @@ body .dg .c input[type=checkbox]:focus {
 }
  
 body .dg .c .slider {
-  background: #252731;
-  border-radius: 0;
+  background: #23232d;
+  border-radius: 2px;
   -webkit-box-shadow: none;
           box-shadow: none;
   padding: 0;
+  overflow: hidden;
 }
 
 body .dg .c .slider:hover {
@@ -223,7 +225,7 @@ body .dg .c .slider:hover {
 }
 
 body .dg .c .slider-fg {
-  background: #32364a;
+  background: #3f4354;
   border-radius: 0;
   margin-left: 0;
   padding-right: 0;

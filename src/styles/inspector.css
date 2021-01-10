@@ -32,18 +32,33 @@
   bottom: 0;
   top: 0;
   left: 0;
-  background: #1c1c25;
+  background: #17171f;
   padding: 0;
-  font-family: Arial;
-  font-size: 12px;
-  color: #aaa;
-  -webkit-box-shadow: 0 0 30px rgba(0,0,0,0.2);
-          box-shadow: 0 0 30px rgba(0,0,0,0.2);
+  font-size: 13px;
+  color: #7c7c85;
+
+  box-shadow:
+    0 0px 1.6px rgba(0, 0, 0, 0.025),
+    0 0px 3.9px rgba(0, 0, 0, 0.036),
+    0 0px 7.4px rgba(0, 0, 0, 0.045),
+    0 0px 13.2px rgba(0, 0, 0, 0.054),
+    0 0px 24.7px rgba(0, 0, 0, 0.065),
+    0 0px 60px rgba(0, 0, 0, 0.09)
+  ;
+}
+
+.ins-container,
+.ins-container * {
+  box-sizing: border-box;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body .ins-container::-webkit-scrollbar {
-  background: #1c1c25;
-  width: 12px;
+  background: #17171f;
+  width: 5px;
+  border-radius: 1px;
 }
 
 body .ins-container::-webkit-scrollbar-thumb {
@@ -54,47 +69,34 @@ body .ins-container::-webkit-scrollbar-thumb {
   border-radius: 0;
 }
 
-@media only screen and (max-width : 1500px) {
-  .ins-container {
-    -webkit-transform: translate(-230px, 0);
-        -ms-transform: translate(-230px, 0);
-            transform: translate(-230px, 0);
+@keyframes inspector-start-open {
+  0%, 80% {
+    transform: translate(0, 0);
   }
+  100% {
+    transform: translate(-220px, 0);
+  }
+}
 
+.ins-container {
+  transform: translate(-220px, 0);
+  transition: transform ease;
+  transition-delay: 2000ms;
+  transition-duration: 300ms;
+  animation: inspector-start-open 2000ms;
+}
+
+.ins-container:hover {
+  transform: translate(0, 0);
+  transition-delay: 0ms;
+  transition-duration: 400ms;
+}
+
+@media only screen and (min-width : 1300px) {
+  .ins-container,
   .ins-container:hover {
-    -webkit-transform: none;
-        -ms-transform: none;
-            transform: none;
-  }
-
-  .ins-container {
-    -webkit-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-       -o-transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        transition: all 500ms cubic-bezier(0.965, 0.025, 0.735, 0.415);
-
-    -webkit-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-       -o-transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415); 
-        transition-timing-function: cubic-bezier(0.965, 0.025, 0.735, 0.415);
-
-    -o-transition-delay: 3s;
-
-       transition-delay: 3s;
-    -webkit-transition-delay: 3s;
-  }
-
-  .ins-container:hover {
-    -webkit-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-       -o-transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        transition: all 500ms cubic-bezier(0.095, 0.665, 0.400, 0.835);
-
-    -webkit-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-       -o-transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835); 
-        transition-timing-function: cubic-bezier(0.095, 0.665, 0.400, 0.835);
-
-    -o-transition-delay: 0;
-
-       transition-delay: 0;
-    -webkit-transition-delay: 0;
+    animation: none;
+    transform: translate(0, 0);
   }
 }
 
@@ -102,31 +104,34 @@ body .ins-container::-webkit-scrollbar-thumb {
   width: auto;
   height: auto;
   padding: 2px 5px;
-  margin: 4px 0 0 0;
+  margin: 4px 5px 0px 0;
   right: 0px;
   min-width: 0;
   position: absolute;
   z-index: 100;
 }
 
+.ins-top-panel {
+  height: 50px;
+  background: #14151f;
+}
+
 .ins-search-box {
-  margin: 20px 0px 16px 13px;
+  margin: 7px 5px 9px 5px;
   border: 0;
   padding: 7px 8px;
-  font-size: 12px;
-  width: 100%;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  font-size: 13px;
+  width: 235px;
   border-radius: 3px;
-  background: #111117;
-  color: #919691;
+  background: #12131b;
+  color: #8e8d96;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
 
 .ins-search-box:focus {
-  background: #15151d;
+  background: #0f1017;
   border: 0;
   outline: 0;
 }
@@ -144,7 +149,6 @@ body .ins-container::-webkit-scrollbar-thumb {
   height: 10px;
   width: 10px;
   content: 'x';
-  font-family: Arial;
   line-height: 0;
   font-size: 13px;
   color: #999;
@@ -153,23 +157,19 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 .ins-search-box::-webkit-input-placeholder {
-  color: #777;
+  color: #56565f;
 }
 
 .ins-search-box:-moz-placeholder {
-  color: #777;
+  color: #56565f;
 }
 
 .ins-search-box::-moz-placeholder {
-  color: #777;
+  color: #56565f;
 }
 
 .ins-search-box:-ms-input-placeholder {  
-  color: #777;
-}
-
-.ins-world-tree {
-
+  color: #56565f;
 }
 
 .ins-control-group {
@@ -193,8 +193,6 @@ body .ins-container::-webkit-scrollbar-thumb {
   border: 0;
   color: #aaa;
   border-radius: 2px;
-  -webkit-box-sizing: border-box;
-          box-sizing: border-box;
   outline: none;
   margin: 0;
 }
@@ -230,7 +228,7 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 .jstree-default .jstree-wholerow {
-  height: 26px;
+  height: 28px;
 }
 
 .jstree-default .jstree-wholerow-clicked,
@@ -246,44 +244,35 @@ body .ins-container::-webkit-scrollbar-thumb {
 
 .jstree-default .jstree-leaf .jstree-clicked {
   color: #bbb !important;
-
-  -webkit-transition: color 100ms linear; 
-     -o-transition: color 100ms linear; 
-      transition: color 100ms linear; 
 }
 
 .jstree-default .jstree-anchor {
   line-height: 27px;
 }
 
-.jstree-default .jstree-container-ul> .jstree-node > .jstree-anchor:before,
+.jstree-default .jstree-container-ul {
+  margin-bottom: 12px;
+}
+
+.jstree-default .jstree-container-ul > .jstree-node > .jstree-anchor:before,
 .jstree-default .jstree-open > .jstree-children > .jstree-node > .jstree-anchor:before {
   content: '';
   display: block;
   position: absolute;
   left: 0;
   right: 1px;
-  height: 26px;
-  background: transparent;
+  height: 28px;
   border-radius: 0;
   -webkit-box-shadow: none;
           box-shadow: none;
   border-right: none;
   pointer-events: none;
-  background: rgba(0,0,0,0);
-
-  -webkit-transition: background 100ms linear; 
-     -o-transition: background 100ms linear; 
-      transition: background 100ms linear; 
+  background: rgb(44, 47, 62, 0.5);
+  opacity: 0;
 }
 
 .jstree-default .jstree-anchor.jstree-clicked:before {
-  background: rgba(58, 63, 88, 0.35) !important;
-
-  -webkit-transition: background 100ms linear; 
-     -o-transition: background 100ms linear; 
-      transition: background 100ms linear; 
-
+  opacity: 1 !important;
   pointer-events: none;
 }
 
@@ -294,7 +283,10 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 .jstree-default .jstree-node {
-  margin-left: 10px;
+  min-height: 28px;
+  line-height: 28px;
+  margin-left: 12px;
+  min-width: 26px;
 }
 
 .jstree-default .jstree-icon {
@@ -309,19 +301,21 @@ body .ins-container::-webkit-scrollbar-thumb {
   font-size: 11px;
   position: absolute;
   top: 0px;
-  left: 10px;
+  left: 0px;
+  width: 24px;
+  line-height: 24px;
+  transform-origin: 12px 12px;
+  transform: translate(0px, -0px);
 }
 
 .jstree-default .jstree-open > .jstree-icon:before {
   content: '▾';
-  -webkit-transform: rotate(180deg);
-      -ms-transform: rotate(180deg);
-          transform: rotate(180deg);
   top: 2px;
 }
 
 .jstree-default .jstree-closed > .jstree-icon:before {
   content: '▾';
+  transform: rotate(-90deg) translate(-2px, 0px);
 }
 
 .jstree-leaf .jstree-icon:before {
@@ -350,7 +344,7 @@ body .ins-container::-webkit-scrollbar-thumb {
 .jstree-node-type-bodies > .jstree-anchor,
 .jstree-node-type-constraints > .jstree-anchor,
 .jstree-node-type-composites > .jstree-anchor {
-  color: #888;
+  color: #51515d;
 }
 
 .ins-container *::-webkit-scrollbar {
@@ -359,13 +353,13 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 .ins-container *::-webkit-scrollbar-thumb:vertical {
-  border-left: 3px solid #1c1c25;
+  border-left: 3px solid #17171f;
   background: #1c1d2f;
   width: 10px;
 }
 
 .ins-container *::-webkit-scrollbar-thumb:horizontal {
-  border-top: 3px solid #1c1c25;
+  border-top: 3px solid #17171f;
   background: #1c1d2f;
   height: 10px;
 }
@@ -376,7 +370,6 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 #vakata-dnd {
-  font-family: Arial;
   font-size: 12px;
   color: #aaa;
 }
