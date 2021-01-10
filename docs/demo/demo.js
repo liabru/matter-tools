@@ -1,9 +1,8 @@
 var sourceLinkRoot = 'https://github.com/liabru/matter-tools/blob/master';
 
 MatterTools.Demo.create({
-  inline: false,
+  fullPage: true,
   preventZoom: true,
-  resetOnOrientation: true,
   startExample: true,
   appendTo: document.body,
 
