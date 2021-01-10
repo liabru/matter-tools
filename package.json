@@ -25,11 +25,11 @@
     "build-demo": "mkdir -p docs/demo/lib && cp -r build/ docs/demo/lib & cp node_modules/matter-js/build/matter.min.js docs/demo/lib",
     "lint": "eslint src/**/*.js",
     "doc": "markdox src/**/*.js -o API.md && npm run build-demo",
-    "release": "npm version minor -m 'release %s' && npm publish",
-    "release-patch": "npm version patch -m 'release %s' && npm publish",
-    "preversion": "npm run lint",
+    "release": "npm version minor -m 'release %s'",
+    "release-patch": "npm version patch -m 'release %s'",
+    "preversion": "git checkout master && npm run lint",
     "version": "npm run build && npm run doc && git add -A build docs API.md",
-    "postversion": "git push && git push --tags"
+    "release-push": "git push && git push --tags && npm publish"
   },
   "dependencies": {
     "dat.gui": "^0.7.7",
