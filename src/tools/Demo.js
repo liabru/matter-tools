@@ -176,7 +176,6 @@ Demo.setExample = function(demo, example) {
     }
 
     if (instance.canvas) {
-      demo.dom.header.style.maxWidth = instance.canvas.width + 'px';
       demo.dom.root.appendChild(instance.canvas);
     }
 
