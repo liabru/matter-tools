@@ -141,6 +141,7 @@ var _initControls = function(inspector) {
   var controls = inspector.controls;
 
   var $inspectorContainer = $('<div class="ins-container">'),
+    $topPanel = $('<div class="ins-top-panel">'),
     $buttonGroup = $('<div class="ins-control-group">'),
     $searchBox = $('<input class="ins-search-box" type="search" placeholder="search">'),
     $importButton = $('<button class="ins-import-button ins-button">Import</button>'),
@@ -155,7 +156,7 @@ var _initControls = function(inspector) {
     $buttonGroup.append($pauseButton, $helpButton);
   }
 
-  $inspectorContainer.prepend($searchBox, $addCompositeButton);
+  $inspectorContainer.prepend($topPanel, $searchBox, $addCompositeButton);
   $body.prepend($inspectorContainer);
 
   controls.pauseButton = $pauseButton;
