@@ -148,8 +148,7 @@ var _initDatGui = function(gui) {
       metrics.add(engine.metrics, 'narrowEff').listen();
       metrics.add(engine.metrics, 'narrowReuse').listen();
     }
-    metrics.close();
-  } else {
+    
     metrics.open();
   }
 
@@ -177,11 +176,10 @@ var _initDatGui = function(gui) {
     worldGui.add(funcs, 'clear');
     worldGui.open();
     
-    var gravity = worldGui.addFolder('Gravity');
+    var gravity = datGui.addFolder('Gravity');
     gravity.add(engine.world.gravity, 'scale', 0, 0.001).step(0.0001);
     gravity.add(engine.world.gravity, 'x', -1, 1).step(0.01);
     gravity.add(engine.world.gravity, 'y', -1, 1).step(0.01);
-    gravity.open();
 
     var physics = datGui.addFolder('Engine');
     physics.add(engine, 'enableSleeping');
@@ -194,8 +192,6 @@ var _initDatGui = function(gui) {
     if (runner) {
       physics.add(runner, 'enabled');
     }
-
-    physics.open();
   }
 
   if (gui.render) {
