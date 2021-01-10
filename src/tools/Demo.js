@@ -51,7 +51,8 @@ Demo.create = function(options) {
     dom: {}
   }, options || {});
 
-  if (demo.examples.length > 1 && options.toolbar.exampleSelect !== false) {
+  if (!options.toolbar 
+    || (demo.examples.length > 1 && options.toolbar && options.toolbar.exampleSelect !== false)) {
     demo.toolbar.exampleSelect = true;
   }
 
