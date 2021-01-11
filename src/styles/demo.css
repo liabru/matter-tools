@@ -110,6 +110,7 @@
   margin: 0;
   width: 18px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .matter-header h1 a {
@@ -118,7 +119,7 @@
   font-weight: 400;
   display: block;
   text-decoration: none;
-  padding: 4px 0 1px 0;
+  padding: 3px 0 2px 0;
   border-bottom: 1px solid transparent;
   white-space: nowrap;
   float: right;
@@ -160,11 +161,18 @@
   text-decoration: none;
   line-height: 13px;
   margin: 0 -10px 0 0;
+  flex-shrink: 0;
 }
 
 .matter-logo {
   height: 33px;
-  width: 52px;
+  width: 46px;
+}
+
+@media screen and (min-width: 1024px) {
+  .matter-logo {
+    width: 50px;
+  }
 }
 
 .matter-logo #m-triangle {
@@ -238,7 +246,7 @@
   background: transparent;
   color: #c5c5cc;
   font-size: 14px;
-  height: 30px;
+  line-height: 33px;
   width: 100%;
   outline: none;
   padding: 0 25px 0 7px;
@@ -257,6 +265,7 @@
 }
 
 .matter-select-wrapper {
+  height: 33px;
   width: 100%;
   min-width: 100px;
   max-width: 175px;
@@ -302,7 +311,7 @@
   height: 20px;
   position: absolute;
   z-index: 2;
-  top: 5px;
+  top: 6px;
   right: 0;
   border-radius: 5px;
   background: #101119;
@@ -311,7 +320,6 @@
 .matter-btn {
   border: 0;
   background: rgba(0,0,0,0.1);
-  padding: 2px 0 0 0;
   width: 40px;
   height: 33px;
   border-radius: 2px;
@@ -322,6 +330,7 @@
   text-decoration: none;
   text-align: center;
   cursor: default;
+  flex-shrink: 0;
 }
 
 .matter-btn svg {
@@ -355,9 +364,17 @@
   font-size: 15px;
 }
 
+.matter-btn-tools svg {
+  margin-left: -3px;
+}
+
 .matter-btn-inspect {
   position: relative;
   display: none;
+}
+
+.matter-btn-inspect svg {
+  margin-left: -3px;
 }
 
 .matter-btn-source {
@@ -372,6 +389,10 @@
   font-size: 18px;
 }
 
+.matter-btn-fullscreen svg {
+  margin-left: -3px;
+}
+
 .matter-is-fullscreen .matter-btn-tools,
 .matter-is-fullscreen .matter-btn-inspect {
   display: none;
@@ -383,7 +404,6 @@
   content: ' ';
   position: absolute;
   bottom: 10px;
-  left: 33px;
   width: 3px;
   height: 3px;
   background: #f5df75;
@@ -393,6 +413,10 @@
   transition: opacity 100ms ease, transform 100ms ease;
 }
 
+.matter-btn-inspect:after {
+  left: 31px;
+}
+
 .matter-btn-tools:after {
   background: #f45f5f;
   left: 28px;
@@ -400,6 +424,7 @@
 
 .matter-btn-fullscreen:after {
   background: #76F09B;
+  left: 32px;
 }
 
 .matter-is-fullscreen .matter-btn-fullscreen:after,
