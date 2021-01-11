@@ -69,21 +69,11 @@ body .ins-container::-webkit-scrollbar-thumb {
   border-radius: 0;
 }
 
-@keyframes inspector-start-open {
-  0%, 80% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(-220px, 0);
-  }
-}
-
 .ins-container {
   transform: translate(-220px, 0);
   transition: transform ease;
   transition-delay: 2000ms;
   transition-duration: 300ms;
-  animation: inspector-start-open 2000ms;
 }
 
 .ins-container:hover {
@@ -95,7 +85,6 @@ body .ins-container::-webkit-scrollbar-thumb {
 @media only screen and (min-width : 1300px) {
   .ins-container,
   .ins-container:hover {
-    animation: none;
     transform: translate(0, 0);
   }
 }

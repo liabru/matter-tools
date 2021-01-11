@@ -49,21 +49,11 @@ body .dg.ac {
   right: inherit;
 }
 
-@keyframes gui-start-open {
-  0%, 80% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(230px, 0);
-  }
-}
-
 body .dg.main {
   transform: translate(230px, 0);
   transition: transform ease;
   transition-delay: 2000ms;
   transition-duration: 300ms;
-  animation: gui-start-open 2000ms;
 }
 
 body .dg.main:hover {
@@ -75,7 +65,6 @@ body .dg.main:hover {
 @media only screen and (min-width : 1300px) {
   body .dg.main,
   body .dg.main:hover {
-    animation: none;
     transform: translate(0, 0);
   }
 }
