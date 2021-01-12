@@ -25,8 +25,6 @@
 
 .ins-container {
   position: fixed;
-  overflow: auto;
-  overflow-x: hidden;
   z-index: 10;
   width: 245px;
   bottom: 0;
@@ -55,20 +53,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body .ins-container::-webkit-scrollbar {
-  background: #17171f;
-  width: 5px;
-  border-radius: 1px;
-}
-
-body .ins-container::-webkit-scrollbar-thumb {
-  background: transparent;
-  width: 5px;
-  border-left: 5px solid transparent;
-  border-right: 6px solid #2a2a31;
-  border-radius: 0;
-}
-
 .ins-container {
   transform: translate(-220px, 0);
   transition: transform ease;
@@ -88,6 +72,42 @@ body .ins-container::-webkit-scrollbar-thumb {
     transition-delay: 0ms;
     transform: translate(0, 0);
   }
+}
+
+.ins-world-tree {
+  position: absolute;
+  overflow: auto;
+  top: 91px;
+  left: 3px;
+  right: 0;
+  bottom: 0;
+  scrollbar-color: #17171f #17171f;
+  scrollbar-width: thin;
+}
+
+.ins-world-tree:hover {
+  scrollbar-color: #2a2a31 #17171f;
+  scrollbar-width: thin;
+}
+
+.ins-world-tree::-webkit-scrollbar {
+  background: #17171f;
+  width: 6px;
+  height: 6px;
+}
+
+.ins-world-tree::-webkit-scrollbar-track,
+.ins-world-tree::-webkit-scrollbar-corner {
+  background: #17171f;
+}
+  
+.ins-world-tree::-webkit-scrollbar-thumb {
+  background: #17171f;
+  border-radius: 3px;
+}
+
+.ins-world-tree:hover::-webkit-scrollbar-thumb {
+  background: #2a2a31;
 }
 
 .ins-add-button.ins-button {
@@ -335,28 +355,6 @@ body .ins-container::-webkit-scrollbar-thumb {
 .jstree-node-type-constraints > .jstree-anchor,
 .jstree-node-type-composites > .jstree-anchor {
   color: #51515d;
-}
-
-.ins-container *::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.ins-container *::-webkit-scrollbar-thumb:vertical {
-  border-left: 3px solid #17171f;
-  background: #1c1d2f;
-  width: 10px;
-}
-
-.ins-container *::-webkit-scrollbar-thumb:horizontal {
-  border-top: 3px solid #17171f;
-  background: #1c1d2f;
-  height: 10px;
-}
-
-.ins-container *::-webkit-scrollbar-track,
-.ins-container *::-webkit-scrollbar-corner {
-  background: transparent;
 }
 
 #vakata-dnd {
