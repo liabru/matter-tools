@@ -85,6 +85,7 @@ body .ins-container::-webkit-scrollbar-thumb {
 @media only screen and (min-width : 1300px) {
   .ins-container,
   .ins-container:hover {
+    transition-delay: 0ms;
     transform: translate(0, 0);
   }
 }
@@ -93,7 +94,7 @@ body .ins-container::-webkit-scrollbar-thumb {
   width: auto;
   height: auto;
   padding: 2px 5px;
-  margin: 4px 5px 0px 0;
+  margin: 1px 10px 0px 0;
   right: 0px;
   min-width: 0;
   position: absolute;
@@ -101,7 +102,7 @@ body .ins-container::-webkit-scrollbar-thumb {
 }
 
 .ins-top-panel {
-  height: 50px;
+  height: 48px;
   background: #14151f;
 }
 
@@ -166,7 +167,7 @@ body .ins-container::-webkit-scrollbar-thumb {
   clear: both;
   overflow: hidden;
   padding: 14px 20px 12px 20px;
-  background: #0d0f1b;
+  background: #17171f;
   border-bottom: 1px solid #29292d;
 }
 
@@ -178,23 +179,23 @@ body .ins-container::-webkit-scrollbar-thumb {
   padding: 10px 11px;
   min-width: 49px;
   text-align: center;
-  background: #0d0f1b;
+  background: #0e0f15;
   border: 0;
-  color: #aaa;
+  color: #b1b1c3;
   border-radius: 2px;
   outline: none;
   margin: 0;
 }
 
 .ins-button:hover {
-  background: #212a3a;
+  background: #000;
 }
 
 .ins-button:active {
-  -webkit-transform: translateY(2px);
-      -ms-transform: translateY(2px);
-          transform: translateY(2px);
-  background: #212a3a;
+  -webkit-transform: translateY(1px);
+      -ms-transform: translateY(1px);
+          transform: translateY(1px);
+  background: #000;
 }
 
 .ins-button::-moz-focus-inner {
