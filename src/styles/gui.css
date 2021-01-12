@@ -30,7 +30,7 @@ body .dg.main {
   overflow-y: scroll;
   top: 0;
   right: 0;
-  padding: 50px 0 0 0;
+  padding: 48px 0 0 0;
 }
 
 body .dg.main,
@@ -65,6 +65,7 @@ body .dg.main:hover {
 @media only screen and (min-width : 1300px) {
   body .dg.main,
   body .dg.main:hover {
+    transition-delay: 0;
     transform: translate(0, 0);
   }
 }
@@ -92,11 +93,15 @@ body .dg {
   font-size: 12px;
 }
 
+body .dg .closed .cr {
+  display: none;
+}
+
 body .dg li:not(.folder) {
-  height: 30px;
+  height: 29px;
   background: #1c1c25;
   border-bottom: 0px;
-  padding: 0 0 0 12px;
+  padding: 0 8px 0 12px;
 }
  
 body .dg li.save-row .button {
@@ -104,10 +109,10 @@ body .dg li.save-row .button {
 }
 
 body .dg li.title {
-  padding-left: 22px;
+  padding: 2px 0 0 24px;
   color: #6a6977;
-  border-bottom: 1px solid #29292d;
-  background: #0d0f1b url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 10px 10px no-repeat;
+  background: #0d0f1b url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) no-repeat;
+  background-position: 12px;
 }
 
 body .dg li.title:hover {
@@ -121,8 +126,7 @@ body .dg .cr.boolean:hover {
 body .dg .cr.function {
   background: #262731;
   color: #636371;
-  border-bottom: 1px solid #222535;
-  border-top: 1px solid #3c3e48;
+  border-top: 1px solid #30313c;
 }
 
 body .dg .cr.function:hover {
@@ -130,6 +134,10 @@ body .dg .cr.function:hover {
 }
 
 body .dg .cr.function:active {
+  background: #2d2e3a;
+}
+
+body .dg .cr.function:active .property-name {
   -webkit-transform: translateY(1px);
       -ms-transform: translateY(1px);
           transform: translateY(1px);
@@ -155,6 +163,7 @@ body .dg .cr.number input[type=text] {
   border: 0;
   border-radius: 2px;
   overflow: hidden;
+  font-size: 11px;
 }
 
 body .dg .cr.number,
@@ -170,7 +179,7 @@ body .dg .c select:focus {
 }
 
 body .dg .c input[type=text]:hover {
-  background: #1e1f29;
+  background: #2b2c3a;
 }
  
 body .dg .c input[type=text]:focus {
@@ -179,7 +188,7 @@ body .dg .c input[type=text]:focus {
 }
 
 body .dg .c input[type=checkbox] {
-  margin-top: 11px;
+  margin-top: 10px;
   border: none;
   border-radius: 50%;
   appearance: none;
@@ -187,13 +196,13 @@ body .dg .c input[type=checkbox] {
   -moz-appearance: none;
   background: #35363e;
   display: block;
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   float: right;
 }
 
 body .dg .c input[type=checkbox]:checked {
-  background: #848aa2;
+  background: #747784;
 }
 
 body .dg .c input[type=checkbox]:focus {
