@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.12.1 by @liabru 2021-01-11
+ * matter-tools 0.12.2 by @liabru 2021-01-12
  * https://github.com/liabru/matter-tools
  * License MIT
  * 
