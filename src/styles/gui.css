@@ -27,7 +27,6 @@ body .dg.main {
   height: 100%;
   background: #14151f;
   position: fixed;
-  overflow-y: scroll;
   top: 0;
   right: 0;
   padding: 48px 0 0 0;
@@ -74,17 +73,36 @@ body .dg.main .close-button {
   display: none;
 }
 
-body .dg.main::-webkit-scrollbar {
-  background: #1c1c25;
-  width: 12px;
+body .dg.main > ul {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-color: #0d0f1b #0d0f1b;
+  scrollbar-width: thin;
 }
 
-body .dg.main::-webkit-scrollbar-thumb {
-  background: transparent;
-  width: 5px;
-  border-left: 5px solid transparent;
-  border-right: 6px solid #2a2a31;
-  border-radius: 0;
+body .dg.main > ul:hover {
+  scrollbar-color: #44444e #0d0f1b;
+  scrollbar-width: thin;
+}
+
+body .dg.main > ul::-webkit-scrollbar {
+  background: #0d0f1b;
+  width: 6px;
+  height: 6px;
+}
+
+body .dg.main > ul::-webkit-scrollbar-track,
+body .dg.main > ul::-webkit-scrollbar-corner {
+  background: #0d0f1b;
+}
+  
+body .dg.main > ul::-webkit-scrollbar-thumb {
+  background: #0d0f1b;
+  border-radius: 3px;
+}
+
+body .dg.main > ul:hover::-webkit-scrollbar-thumb {
+  background: #44444e;
 }
  
 body .dg {
