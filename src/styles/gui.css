@@ -31,7 +31,24 @@ body .dg.main * {
   font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-} 
+}
+
+body .dg.main *:focus,
+body .dg.main *:active {
+  outline: 0;
+}
+
+body .dg.main *:-moz-focusring {
+  outline: 3px solid #4da4e4;
+  outline-offset: -1px;
+  z-index: 5;
+}
+
+body .dg.main *:focus-visible {
+  outline: 3px solid #4da4e4;
+  outline-offset: -1px;
+  z-index: 5;
+}
 
 body .dg.ac {
   position: static;
@@ -187,7 +204,6 @@ body .dg .cr.function {
 body .dg .c select,
 body .dg .c select:focus {
   width: 88px;
-  outline: 0;
 }
 
 body .dg .c input[type=text]:hover {
@@ -197,6 +213,7 @@ body .dg .c input[type=text]:hover {
 body .dg .c input[type=text]:focus {
   background: #2b2c3a;
   color: #fff;
+  outline: none;
 }
 
 body .dg .c input[type=checkbox] {
@@ -215,10 +232,6 @@ body .dg .c input[type=checkbox] {
 
 body .dg .c input[type=checkbox]:checked {
   background: #747784;
-}
-
-body .dg .c input[type=checkbox]:focus {
-  outline: none;
 }
  
 body .dg .c .slider {

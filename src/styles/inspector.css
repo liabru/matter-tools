@@ -45,7 +45,23 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.ins-container {
+.ins-container *:focus,
+.ins-container *:active {
+  outline: 0;
+}
+
+.ins-container *:-moz-focusring {
+  outline: 3px solid #4da4e4;
+  outline-offset: -1px;
+  z-index: 5;
+}
+
+.ins-container *:focus-visible {
+  outline: 3px solid #4da4e4;
+  outline-offset: -1px;
+  z-index: 5;
+}
+
   transform: translate(-220px, 0);
   transition: transform ease;
   transition-delay: 2000ms;
@@ -210,11 +226,6 @@
   background: #000;
 }
 
-.ins-button::-moz-focus-inner {
-  padding: 0;
-  border: 0;
-}
-
 .jstree-default .jstree-search {
   font-style: italic;
   color: #aaa;
@@ -250,6 +261,7 @@
 
 .jstree-default .jstree-anchor {
   line-height: 27px;
+  outline: none;
 }
 
 .jstree-default .jstree-container-ul {
