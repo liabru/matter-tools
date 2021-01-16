@@ -74,7 +74,7 @@ body .dg.main:hover {
 @media only screen and (min-width : 1300px) {
   body .dg.main,
   body .dg.main:hover {
-    transition-delay: 0;
+    transition-delay: 0ms;
     transform: translate(0, 0);
   }
 }
