@@ -71,7 +71,7 @@ body .dg.main:hover {
   transition-duration: 400ms;
 }
 
-@media only screen and (min-width : 1300px) {
+@media only screen and (min-width: 1300px) {
   body .dg.main,
   body .dg.main:hover {
     transition-delay: 0ms;
@@ -106,7 +106,7 @@ body .dg.main > ul::-webkit-scrollbar-track,
 body .dg.main > ul::-webkit-scrollbar-corner {
   background: #0d0f1b;
 }
-  
+
 body .dg.main > ul::-webkit-scrollbar-thumb {
   background: #0d0f1b;
   border-radius: 3px;
@@ -115,7 +115,7 @@ body .dg.main > ul::-webkit-scrollbar-thumb {
 body .dg.main > ul:hover::-webkit-scrollbar-thumb {
   background: #44444e;
 }
- 
+
 body .dg {
   color: #6d6d7d;
   text-shadow: none !important;
@@ -132,7 +132,7 @@ body .dg li:not(.folder) {
   border-bottom: 0px;
   padding: 0 8px 0 12px;
 }
- 
+
 body .dg li.save-row .button {
   text-shadow: none !important;
 }
@@ -140,7 +140,9 @@ body .dg li.save-row .button {
 body .dg li.title {
   padding: 2px 0 0 24px;
   color: #6a6977;
-  background: #0d0f1b url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) no-repeat;
+  background: #0d0f1b
+    url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==)
+    no-repeat;
   background-position: 12px;
 }
 
@@ -167,9 +169,7 @@ body .dg .cr.function:active {
 }
 
 body .dg .cr.function:active .property-name {
-  -webkit-transform: translateY(1px);
-      -ms-transform: translateY(1px);
-          transform: translateY(1px);
+  transform: translateY(1px);
 }
 
 body .dg .c,
@@ -184,8 +184,8 @@ body .dg .c select {
 }
 
 body .dg .c select,
-body .dg .c input[type=text],
-body .dg .cr.number input[type=text] {
+body .dg .c input[type="text"],
+body .dg .cr.number input[type="text"] {
   text-align: right;
   background: transparent;
   color: #686c7b;
@@ -206,17 +206,17 @@ body .dg .c select:focus {
   width: 88px;
 }
 
-body .dg .c input[type=text]:hover {
+body .dg .c input[type="text"]:hover {
   background: #2b2c3a;
 }
- 
-body .dg .c input[type=text]:focus {
+
+body .dg .c input[type="text"]:focus {
   background: #2b2c3a;
   color: #fff;
   outline: none;
 }
 
-body .dg .c input[type=checkbox] {
+body .dg .c input[type="checkbox"] {
   margin-top: 10px;
   border: none;
   border-radius: 50%;
@@ -230,15 +230,14 @@ body .dg .c input[type=checkbox] {
   float: right;
 }
 
-body .dg .c input[type=checkbox]:checked {
+body .dg .c input[type="checkbox"]:checked {
   background: #747784;
 }
- 
+
 body .dg .c .slider {
   background: #23232d;
   border-radius: 2px;
-  -webkit-box-shadow: none;
-          box-shadow: none;
+  box-shadow: none;
   padding: 0;
   overflow: hidden;
 }

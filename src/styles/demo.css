@@ -3,20 +3,11 @@
 */
 
 .matter-demo {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
   background: #14151f;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   height: 100vh;
   padding: 50px 0 0 0;
 }
@@ -56,6 +47,9 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   max-width: 100%;
   max-height: 100%;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 
@@ -79,15 +73,9 @@
   left: 0;
   right: 0;
   background: #0e0f19;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  align-items: center;
+  justify-content: center;
 }
 
 .matter-demo-inline .matter-header-outer {
@@ -100,27 +88,15 @@
 .matter-header {
   width: 100%;
   padding: 7px 20px 8px 20px;
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  align-items: center;
+  justify-content: center;
 }
 
 .matter-header-inner {
-  display: -webkit-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
 }
 
@@ -146,7 +122,7 @@
 
 .matter-header h1 a:hover,
 .matter-header h1 a:focus {
-  border-bottom: 1px solid #F5B862;
+  border-bottom: 1px solid #f5b862;
   color: #fff;
   outline: 0;
 }
@@ -198,72 +174,40 @@
 }
 
 .matter-logo #m-triangle {
-  -webkit-transform-origin: 14px 856px;
-      -ms-transform-origin: 14px 856px;
-          transform-origin: 14px 856px;
-  -webkit-transition: -webkit-transform 400ms ease;
-  transition: -webkit-transform 400ms ease;
-  -o-transition: transform 400ms ease;
+  transform-origin: 14px 856px;
   transition: transform 400ms ease;
-  transition: transform 400ms ease, -webkit-transform 400ms ease;
 }
 
 .matter-link:focus #m-triangle,
 .matter-logo:hover #m-triangle {
-  -webkit-transform: rotate(-30deg) translate(-98px, -25px);
-      -ms-transform: rotate(-30deg) translate(-98px, -25px);
-          transform: rotate(-30deg) translate(-98px, -25px);
+  transform: rotate(-30deg) translate(-98px, -25px);
 }
 
 .matter-logo #m-circle {
-  -webkit-transition: -webkit-transform 200ms ease;
-  transition: -webkit-transform 200ms ease;
-  -o-transition: transform 200ms ease;
   transition: transform 200ms ease;
-  transition: transform 200ms ease, -webkit-transform 200ms ease;
-  -webkit-transition-delay: 300ms;
-       -o-transition-delay: 300ms;
-          transition-delay: 300ms;
+  transition-delay: 300ms;
 }
 
 .matter-link:focus #m-circle,
 .matter-logo:hover #m-circle {
-  -webkit-transform: translate(18px, -33px);
-      -ms-transform: translate(18px, -33px);
-          transform: translate(18px, -33px);
+  transform: translate(18px, -33px);
 }
 
 .matter-logo #m-square {
-  -webkit-transition: -webkit-transform 150ms ease;
-  transition: -webkit-transform 150ms ease;
-  -o-transition: transform 150ms ease;
   transition: transform 150ms ease;
-  transition: transform 150ms ease, -webkit-transform 150ms ease;
-  -webkit-transition-delay: 400ms;
-       -o-transition-delay: 400ms;
-          transition-delay: 400ms;
+  transition-delay: 400ms;
 }
 
 .matter-link:focus #m-square,
 .matter-logo:hover #m-square {
-  -webkit-transform: translate(47px, -2px);
-      -ms-transform: translate(47px, -2px);
-          transform: translate(47px, -2px);
+  transform: translate(47px, -2px);
 }
 
 .matter-toolbar {
-  -webkit-box-flex: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1;
-  display: -webkit-box;
-  display: -ms-flexbox;
+  flex-grow: 1;
   display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  align-items: center;
+  justify-content: center;
   margin: 0 18px 0 0;
 }
 
@@ -281,6 +225,9 @@
   appearance: none;
   -moz-appearance: none;
   -webkit-appearance: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 
@@ -300,7 +247,7 @@
 }
 
 .matter-select-wrapper:after {
-  content: ' ';
+  content: " ";
   display: block;
   position: absolute;
   pointer-events: none;
@@ -370,6 +317,9 @@
   cursor: default;
   flex-shrink: 0;
   flex-grow: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 
@@ -390,9 +340,7 @@
 }
 
 .matter-btn:active {
-  -webkit-transform: translate(0px, 1px);
-      -ms-transform: translate(0px, 1px);
-          transform: translate(0px, 1px);
+  transform: translate(0px, 1px);
 }
 
 .matter-btn:focus-visible {
@@ -448,7 +396,7 @@
 .matter-btn-fullscreen:after,
 .matter-btn-tools:after,
 .matter-btn-inspect:after {
-  content: ' ';
+  content: " ";
   position: absolute;
   bottom: 10px;
   width: 3px;
@@ -470,7 +418,7 @@
 }
 
 .matter-btn-fullscreen:after {
-  background: #76F09B;
+  background: #76f09b;
   left: 32px;
 }
 
