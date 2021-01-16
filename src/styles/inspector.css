@@ -62,6 +62,7 @@
   z-index: 5;
 }
 
+.ins-container {
   transform: translate(-220px, 0);
   transition: transform ease;
   transition-delay: 2000ms;

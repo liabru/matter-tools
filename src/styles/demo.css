@@ -60,7 +60,7 @@
 }
 
 .matter-demo.matter-demo-inline canvas {
-  max-height: calc(100% - 63px);
+  max-height: calc(100% - 49px);
 }
 
 .matter-is-fullscreen .matter-demo {
