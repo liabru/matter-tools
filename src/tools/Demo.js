@@ -354,10 +354,6 @@ Demo._bindDom = function(demo) {
     var fullscreenChange = function() {
       var isFullscreen = document.fullscreen || document.webkitIsFullScreen || document.mozFullScreen;
       document.body.classList.toggle('matter-is-fullscreen', isFullscreen);
-
-      setTimeout(function() {
-        Demo.setExample(demo, demo.example);
-      }, 500);
     };
 
     document.addEventListener('webkitfullscreenchange', fullscreenChange);
