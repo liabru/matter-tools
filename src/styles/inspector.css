@@ -30,19 +30,11 @@
   bottom: 0;
   top: 0;
   left: 0;
-  background: #17171f;
+  background: #191921;
   padding: 0;
   font-size: 13px;
   color: #7c7c85;
-
-  box-shadow:
-    0 0px 1.6px rgba(0, 0, 0, 0.025),
-    0 0px 3.9px rgba(0, 0, 0, 0.036),
-    0 0px 7.4px rgba(0, 0, 0, 0.045),
-    0 0px 13.2px rgba(0, 0, 0, 0.054),
-    0 0px 24.7px rgba(0, 0, 0, 0.065),
-    0 0px 60px rgba(0, 0, 0, 0.09)
-  ;
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
 }
 
 .ins-container,
@@ -81,33 +73,33 @@
   left: 3px;
   right: 0;
   bottom: 0;
-  scrollbar-color: #17171f #17171f;
+  scrollbar-color: #191921 #191921;
   scrollbar-width: thin;
 }
 
 .ins-world-tree:hover {
-  scrollbar-color: #2a2a31 #17171f;
+  scrollbar-color: #32323a #191921;
   scrollbar-width: thin;
 }
 
 .ins-world-tree::-webkit-scrollbar {
-  background: #17171f;
+  background: #191921;
   width: 6px;
   height: 6px;
 }
 
 .ins-world-tree::-webkit-scrollbar-track,
 .ins-world-tree::-webkit-scrollbar-corner {
-  background: #17171f;
+  background: #191921;
 }
   
 .ins-world-tree::-webkit-scrollbar-thumb {
-  background: #17171f;
+  background: #191921;
   border-radius: 3px;
 }
 
 .ins-world-tree:hover::-webkit-scrollbar-thumb {
-  background: #2a2a31;
+  background: #32323a;
 }
 
 .ins-add-button.ins-button {
@@ -187,7 +179,7 @@
   clear: both;
   overflow: hidden;
   padding: 14px 20px 12px 20px;
-  background: #17171f;
+  background: #191921;
   border-bottom: 1px solid #29292d;
 }
 

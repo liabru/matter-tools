@@ -16,20 +16,13 @@ body .dg .title {
 
 body .dg.main {
   z-index: 10;
-  box-shadow:
-    0 0px 1.6px rgba(0, 0, 0, 0.025),
-    0 0px 3.9px rgba(0, 0, 0, 0.036),
-    0 0px 7.4px rgba(0, 0, 0, 0.045),
-    0 0px 13.2px rgba(0, 0, 0, 0.054),
-    0 0px 24.7px rgba(0, 0, 0, 0.065),
-    0 0px 60px rgba(0, 0, 0, 0.09)
-  ;
   height: 100%;
   background: #14151f;
   position: fixed;
   top: 0;
   right: 0;
   padding: 48px 0 0 0;
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);
 }
 
 body .dg.main,
@@ -75,6 +68,7 @@ body .dg.main .close-button {
 
 body .dg.main > ul {
   height: 100%;
+  background: #191921;
   overflow-y: auto;
   scrollbar-color: #0d0f1b #0d0f1b;
   scrollbar-width: thin;
@@ -201,7 +195,7 @@ body .dg .c input[type=text]:hover {
 }
  
 body .dg .c input[type=text]:focus {
-  background: #1e1f29;
+  background: #2b2c3a;
   color: #fff;
 }
 
