@@ -33,19 +33,17 @@
     "version": "npm run build && npm run build-split && npm run build-demo && npm run doc && git add -A build docs API.md",
     "release-push": "git push && git push --tags && npm publish"
   },
-  "dependencies": {
-    "dat.gui": "^0.7.7",
-    "jquery": "^3.5.1",
-    "jstree": "^3.3.11",
-    "keymaster": "^1.6.2",
-    "matter-js": "^0.15.0"
-  },
   "devDependencies": {
     "case": "^1.6.3",
     "eslint": "^6.8.0",
     "raw-loader": "^4.0.2",
-    "webpack": "^4.44.2",
+    "webpack": "^4.46.0",
     "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.2",
+    "dat.gui": "^0.7.7",
+    "jquery": "^3.5.1",
+    "jstree": "^3.3.11",
+    "keymaster": "^1.6.2",
+    "matter-js": "^0.16.1"
   }
 }
