@@ -5,12 +5,12 @@ const path = require('path');
 const pkg = require('./package.json');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
+const Case = require('case');
 
 module.exports = (env = {}) => {
-  const isDevServer = Boolean(process.env.WEBPACK_DEV_SERVER);
-  const minimize = env.MINIMIZE || isDevServer || false;
+  const minimize = env.MINIMIZE || false;
   const alpha = env.ALPHA || false;
-  const maxSize = 450 * 1024;
+  const maxSize = 350 * 1024;
   const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
   const version = !alpha ? pkg.version : `${pkg.version}-alpha+${commitHash}`;
   const license = fs.readFileSync('LICENSE', 'utf8');
@@ -24,15 +24,20 @@ ${alpha ? alphaInfo : ''}${pkg.homepage}
 License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
 
   return {
-    entry: { [name]: './src/index' },
+    entry: {
+      Inspector: './src/tools/Inspector',
+      Demo: './src/tools/Demo',
+      Gui: './src/tools/Gui',
+      Serializer: './src/tools/Serializer'
+    },
     output: {
-      library: 'MatterTools',
+      library: ['MatterTools', '[name]'],
       publicPath: '/demo/lib/',
       libraryTarget: 'umd',
       umdNamedDefine: true,
       globalObject: 'this',
       path: path.resolve(__dirname, './build'),
-      filename: `${name}${alpha ? '.alpha' : ''}${minimize ? '.min' : ''}.js`
+      filename: params => `${name}.${Case.camel(params.chunk.name)}${minimize ? '.min' : ''}.js`
     },
     module: {
       rules: [
@@ -66,11 +71,7 @@ License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
       alias: {
         'jquery': 'jquery/dist/jquery.min',
         'jstree': 'jstree/dist/jstree.min',
-        'dat.gui': 'dat.gui/build/dat.gui.min',
-        'Demo': path.resolve(__dirname, 'src/tools/Demo'),
-        'Gui': path.resolve(__dirname, 'src/tools/Gui'),
-        'Inspector': path.resolve(__dirname, 'src/tools/Inspector'),
-        'Serializer': path.resolve(__dirname, 'src/tools/Serializer')
+        'dat.gui': 'dat.gui/build/dat.gui.min'
       }
     },
     externals: {
@@ -79,23 +80,36 @@ License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
         commonjs2: 'matter-js',
         amd: 'matter-js',
         root: 'Matter'
-      }
-    },
-    devServer: {
-      watchContentBase: true,
-      hot: false,
-      compress: true,
-      overlay: true,
-      port: 8080,
-      contentBase: [
-        path.resolve(__dirname, './docs'),
-        path.resolve(__dirname, './node_modules/matter-js/build')
-      ],
-      proxy: {
-        '/demo/lib/matter.min.js': {
-          target: 'http://localhost:8080/',
-          pathRewrite: { '^/demo/lib/' : '/' }
-        }
+      },
+      'matter-tools': {
+        commonjs: 'matter-tools',
+        commonjs2: 'matter-tools',
+        amd: 'matter-tools',
+        root: 'MatterTools'
+      },
+      'Demo': {
+        commonjs: 'matter-tools/src/tools/Demo',
+        commonjs2: 'matter-tools/src/tools/Demo',
+        amd: 'matter-tools/src/tools/Demo',
+        root: ['MatterTools', 'Demo']
+      },
+      'Gui': {
+        commonjs: 'matter-tools/src/tools/Gui',
+        commonjs2: 'matter-tools/src/tools/Gui',
+        amd: 'matter-tools/src/tools/Gui',
+        root: ['MatterTools', 'Gui']
+      },
+      'Inspector': {
+        commonjs: 'matter-tools/src/tools/Inspector',
+        commonjs2: 'matter-tools/src/tools/Inspector',
+        amd: 'matter-tools/src/tools/Inspector',
+        root: ['MatterTools', 'Inspector']
+      },
+      'Serializer': {
+        commonjs: 'matter-tools/src/tools/Serializer',
+        commonjs2: 'matter-tools/src/tools/Serializer',
+        amd: 'matter-tools/src/tools/Serializer',
+        root: ['MatterTools', 'Serializer']
       }
     }
   };

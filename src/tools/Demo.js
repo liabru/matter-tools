@@ -7,8 +7,8 @@
 
 const Demo = module.exports = {};
 
-const Gui = require('matter-tools').Gui;
-const Inspector = require('matter-tools').Inspector;
+const Gui = require('Gui');
+const Inspector = require('Inspector');
 const ToolsCommon = require('./Common');
 
 const Matter = require('matter-js');

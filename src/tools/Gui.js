@@ -5,11 +5,11 @@
  * @module Gui
  */
 
-var Gui = module.exports = {};
+const Gui = module.exports = {};
 
 const dat = require('dat.gui');
 const ToolsCommon = require('./Common');
-const Serializer = require('matter-tools').Serializer;
+const Serializer = require('Serializer');
 
 const Matter = require('matter-js');
 const Engine = Matter.Engine;

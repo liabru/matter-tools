@@ -23,13 +23,14 @@
     "dev": "webpack-dev-server --open --no-cache --mode development",
     "dev-mon": "nodemon --watch webpack.config.js ./node_modules/.bin/webpack-dev-server --no-cache --mode development",
     "build": "webpack --mode=production & webpack --mode=production --env.MINIMIZE",
-    "build-demo": "mkdir -p docs/demo/lib && cp -r build/ docs/demo/lib & cp node_modules/matter-js/build/matter.min.js docs/demo/lib",
+    "build-split": "webpack --config webpack.split.config.js --mode=production & webpack --config webpack.split.config.js --mode=production --env.MINIMIZE",
+    "build-demo": "mkdir -p docs/demo/lib && cp -r build/matter-tools.min.js docs/demo/lib & cp node_modules/matter-js/build/matter.min.js docs/demo/lib",
     "lint": "eslint src/**/*.js",
-    "doc": "markdox src/**/*.js -o API.md && npm run build-demo",
+    "doc": "markdox src/**/*.js -o API.md",
     "release": "npm version minor -m 'release %s'",
     "release-patch": "npm version patch -m 'release %s'",
     "preversion": "git checkout master && npm run lint",
-    "version": "npm run build && npm run doc && git add -A build docs API.md",
+    "version": "npm run build && npm run build-split && npm run build-demo && npm run doc && git add -A build docs API.md",
     "release-push": "git push && git push --tags && npm publish"
   },
   "dependencies": {

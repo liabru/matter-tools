@@ -12,7 +12,7 @@ const $ = require('jquery');
 require('jstree');
 
 const ToolsCommon = require('./Common');
-const Serializer = require('matter-tools').Serializer;
+const Serializer = require('Serializer');
 
 const Matter = require('matter-js');
 const Body = Matter.Body;
