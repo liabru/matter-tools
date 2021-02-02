@@ -20,7 +20,8 @@
     "rigid body physics"
   ],
   "scripts": {
-    "dev": "webpack-dev-server --watch-content-base",
+    "dev": "webpack-dev-server --open --no-cache --mode development",
+    "dev-mon": "nodemon --watch webpack.config.js ./node_modules/.bin/webpack-dev-server --no-cache --mode development",
     "build": "webpack --mode=production & webpack --mode=production --env.MINIMIZE",
     "build-demo": "mkdir -p docs/demo/lib && cp -r build/ docs/demo/lib & cp node_modules/matter-js/build/matter.min.js docs/demo/lib",
     "lint": "eslint src/**/*.js",
