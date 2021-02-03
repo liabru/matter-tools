@@ -5,7 +5,7 @@
   "homepage": "https://github.com/liabru/matter-tools",
   "author": "Liam Brummitt <liam@brm.io> (http://brm.io/)",
   "description": "tools for creating, testing and debugging matter.js worlds",
-  "main": "index.js",
+  "main": "build/matter-tools.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/liabru/matter-tools.git"
