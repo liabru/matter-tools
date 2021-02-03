@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.12.3 by @liabru 2021-01-16
+ * matter-tools 0.13.0 by @liabru 2021-02-03
  * https://github.com/liabru/matter-tools
  * License MIT
  * 
@@ -114,11 +114,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/demo/lib";
+/******/ 	__webpack_require__.p = "/demo/lib/";
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 14);
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -130,7 +130,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__0__;
 
 /***/ }),
 
-/***/ 14:
+/***/ 16:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -143,7 +143,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__0__;
 
 const Serializer = module.exports = {};
 
-const Resurrect = __webpack_require__(15);
+const Resurrect = __webpack_require__(17);
 
 const Matter = __webpack_require__(0);
 const Common = Matter.Common;
@@ -229,7 +229,7 @@ Serializer.serialise = function(serializer, object, indent) {
 
 /***/ }),
 
-/***/ 15:
+/***/ 17:
 /***/ (function(module, exports) {
 
 /**

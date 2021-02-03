@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.12.3 by @liabru 2021-01-16
+ * matter-tools 0.13.0 by @liabru 2021-02-03
  * https://github.com/liabru/matter-tools
  * License MIT
  * 
@@ -27,14 +27,14 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("matter-js"), require("matter-tools"));
+		module.exports = factory(require("matter-js"), require("matter-tools/src/tools/Gui"), require("matter-tools/src/tools/Inspector"));
 	else if(typeof define === 'function' && define.amd)
-		define("Demo", ["matter-js", "matter-tools"], factory);
+		define("Demo", ["matter-js", "matter-tools/src/tools/Gui", "matter-tools/src/tools/Inspector"], factory);
 	else if(typeof exports === 'object')
-		exports["Demo"] = factory(require("matter-js"), require("matter-tools"));
+		exports["Demo"] = factory(require("matter-js"), require("matter-tools/src/tools/Gui"), require("matter-tools/src/tools/Inspector"));
 	else
-		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Demo"] = factory(root["Matter"], root["MatterTools"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE__0__, __WEBPACK_EXTERNAL_MODULE__1__) {
+		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Demo"] = factory(root["Matter"], root["MatterTools"]["Gui"], root["MatterTools"]["Inspector"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE__0__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -114,7 +114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/demo/lib";
+/******/ 	__webpack_require__.p = "/demo/lib/";
 /******/
 /******/
 /******/ 	// Load entry module and return exports
@@ -129,12 +129,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__0__;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__1__;
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -186,6 +180,7 @@ Common.domInsertBefore = function(element, before) {
 
 
 /***/ }),
+/* 2 */,
 /* 3 */,
 /* 4 */,
 /* 5 */,
@@ -205,9 +200,9 @@ Common.domInsertBefore = function(element, before) {
 
 const Demo = module.exports = {};
 
-const Gui = __webpack_require__(1).Gui;
-const Inspector = __webpack_require__(1).Inspector;
-const ToolsCommon = __webpack_require__(2);
+const Gui = __webpack_require__(10);
+const Inspector = __webpack_require__(11);
+const ToolsCommon = __webpack_require__(1);
 
 const Matter = __webpack_require__(0);
 const Common = Matter.Common;
@@ -561,7 +556,7 @@ Demo._bindDom = function(demo) {
 };
 
 Demo._createDom = function(options) {
-  let styles = __webpack_require__(10);
+  let styles = __webpack_require__(12);
   ToolsCommon.injectStyles(styles, 'matter-demo-style');
 
   let root = document.createElement('div');
@@ -680,6 +675,18 @@ Demo._createDom = function(options) {
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__10__;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__11__;
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = "/*\n*\tMatterTools.Demo\n*/\n\n.matter-demo {\n  display: flex;\n  background: #14151f;\n  align-items: center;\n  justify-content: center;\n  flex-direction: column;\n  height: 100vh;\n  padding: 50px 0 0 0;\n}\n\n.matter-demo,\n.matter-demo * {\n  box-sizing: border-box;\n  font-family: \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n\n.matter-demo *:focus,\n.matter-demo *:active {\n  outline: 0;\n}\n\n.matter-demo *:-moz-focusring {\n  outline: 3px solid #4da4e4;\n  outline-offset: -1px;\n  z-index: 5;\n}\n\n.matter-demo *:focus-visible {\n  outline: 3px solid #4da4e4;\n  outline-offset: -1px;\n  z-index: 5;\n}\n\n.matter-demo.matter-demo-inline {\n  padding: 0;\n  height: inherit;\n}\n\n.matter-demo canvas {\n  border-radius: 8px;\n  border: 1px solid rgba(255, 255, 255, 0.07);\n  max-width: 100%;\n  max-height: 100%;\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\n.matter-demo.matter-demo-inline canvas {\n  max-height: calc(100% - 49px);\n}\n\n.matter-is-fullscreen .matter-demo {\n  width: 100%;\n}\n\n.matter-is-fullscreen .dg.ac,\n.matter-is-fullscreen .ins-container {\n  display: none;\n}\n\n.matter-header-outer {\n  position: fixed;\n  z-index: 100;\n  top: 0;\n  left: 0;\n  right: 0;\n  background: #0e0f19;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.matter-demo-inline .matter-header-outer {\n  position: static;\n  background: transparent;\n  z-index: 0;\n  width: 100%;\n}\n\n.matter-header {\n  width: 100%;\n  padding: 7px 20px 8px 20px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n.matter-header-inner {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  width: 100%;\n}\n\n.matter-header h1 {\n  display: none;\n  margin: 0 12px 0 0;\n  width: 18px;\n  overflow: hidden;\n  flex-shrink: 0;\n}\n\n.matter-header h1 a {\n  color: #c5c5cc;\n  font-size: 14px;\n  font-weight: 400;\n  display: block;\n  text-decoration: none;\n  padding: 3px 0 2px 0;\n  border-bottom: 1px solid transparent;\n  white-space: nowrap;\n  float: right;\n}\n\n.matter-header h1 a:hover,\n.matter-header h1 a:focus {\n  border-bottom: 1px solid #f5b862;\n  color: #fff;\n  outline: 0;\n}\n\n@media screen and (min-width: 300px) {\n  .matter-header h1 {\n    display: inline;\n  }\n}\n\n@media screen and (min-width: 600px) {\n  .matter-header h1 {\n    width: auto;\n    overflow: visible;\n  }\n}\n\n.btn-home {\n  display: none;\n}\n\n.matter-demo-title svg {\n  fill: #fff;\n  width: 14px;\n  height: 14px;\n  margin: 0px 0 -2px 2px;\n}\n\n.matter-link {\n  text-decoration: none;\n  line-height: 13px;\n  margin: 0 -10px 0 0;\n  flex-shrink: 0;\n}\n\n.matter-link:focus {\n  outline: none;\n}\n\n.matter-logo {\n  height: 33px;\n  width: 46px;\n}\n\n@media screen and (min-width: 1024px) {\n  .matter-logo {\n    width: 50px;\n  }\n}\n\n.matter-logo #m-triangle {\n  transform-origin: 14px 856px;\n  transition: transform 400ms ease;\n}\n\n.matter-link:focus #m-triangle,\n.matter-logo:hover #m-triangle {\n  transform: rotate(-30deg) translate(-98px, -25px);\n}\n\n.matter-logo #m-circle {\n  transition: transform 200ms ease;\n  transition-delay: 300ms;\n}\n\n.matter-link:focus #m-circle,\n.matter-logo:hover #m-circle {\n  transform: translate(18px, -33px);\n}\n\n.matter-logo #m-square {\n  transition: transform 150ms ease;\n  transition-delay: 400ms;\n}\n\n.matter-link:focus #m-square,\n.matter-logo:hover #m-square {\n  transform: translate(47px, -2px);\n}\n\n.matter-toolbar {\n  flex-grow: 1;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  margin: 0 18px 0 0;\n}\n\n.matter-select {\n  background: transparent;\n  color: #c5c5cc;\n  font-size: 14px;\n  line-height: 33px;\n  width: 100%;\n  outline: none;\n  padding: 0 25px 0 7px;\n  margin: 0;\n  border: 0;\n  border-radius: 0;\n  appearance: none;\n  -moz-appearance: none;\n  -webkit-appearance: none;\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\n.matter-select option {\n  background: #fff;\n  color: #000;\n}\n\n.matter-select-wrapper {\n  height: 33px;\n  width: 100%;\n  min-width: 100px;\n  max-width: 175px;\n  position: relative;\n  display: inline-block;\n  margin-right: 4%;\n}\n\n.matter-select-wrapper:after {\n  content: \" \";\n  display: block;\n  position: absolute;\n  pointer-events: none;\n  width: 28px;\n  height: 100%;\n  background: linear-gradient(-90deg, rgb(14 15 25), rgb(14 15 25 / 0));\n  right: 23px;\n  top: 0;\n}\n\n.matter-demo-inline .matter-select-wrapper:after {\n  display: none;\n}\n\n.matter-select:hover,\n.matter-select-wrapper:hover .matter-select {\n  color: #fff;\n}\n\n.matter-select:focus-visible {\n  color: #fff;\n}\n\n.matter-select:-moz-focusring {\n  color: #fff;\n}\n\n.matter-select:focus {\n  outline: 0;\n}\n\n.matter-select-wrapper svg:hover,\n.matter-select-wrapper:hover svg {\n  background: #232635;\n}\n\n.matter-select-wrapper:hover:after svg {\n  fill: #fff;\n}\n\n.matter-select-wrapper svg {\n  display: block;\n  pointer-events: none;\n  fill: #cecece;\n  width: 20px;\n  height: 20px;\n  position: absolute;\n  z-index: 2;\n  top: 6px;\n  right: 0;\n  border-radius: 5px;\n  background: #101119;\n}\n\n.matter-btn {\n  border: 0;\n  background: #0b0c15;\n  width: 40px;\n  height: 33px;\n  border-radius: 2px;\n  display: inline-block;\n  font-size: 16px;\n  line-height: 1;\n  color: #c2cad4;\n  text-decoration: none;\n  text-align: center;\n  cursor: default;\n  flex-shrink: 0;\n  flex-grow: 0;\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\n.matter-btn svg {\n  fill: #fff;\n  width: 15px;\n  height: 15px;\n  margin: 2px 0 0 0;\n}\n\n.matter-demo-inline .matter-btn {\n  background: #0f0f13;\n}\n\n.matter-btn:hover {\n  background: #1c1f2d;\n  outline: none;\n}\n\n.matter-btn:active {\n  transform: translate(0px, 1px);\n}\n\n.matter-btn:focus-visible {\n  background: #1c1f2d;\n  outline: none;\n}\n\n.matter-btn:-moz-focusring {\n  background: #1c1f2d;\n  outline: none;\n}\n\n.matter-btn-tools {\n  position: relative;\n  display: none;\n  font-size: 15px;\n}\n\n.matter-btn-tools svg {\n  margin-left: -3px;\n}\n\n.matter-btn-inspect {\n  position: relative;\n  display: none;\n}\n\n.matter-btn-inspect svg {\n  margin-left: -3px;\n}\n\n.matter-btn-source {\n  display: none;\n  font-size: 12px;\n  text-align: center;\n  line-height: 31px;\n}\n\n.matter-btn-fullscreen {\n  position: relative;\n  font-size: 18px;\n}\n\n.matter-btn-fullscreen svg {\n  margin-left: -3px;\n}\n\n.matter-is-fullscreen .matter-btn-tools,\n.matter-is-fullscreen .matter-btn-inspect {\n  display: none;\n}\n\n.matter-btn-fullscreen:after,\n.matter-btn-tools:after,\n.matter-btn-inspect:after {\n  content: \" \";\n  position: absolute;\n  bottom: 10px;\n  width: 3px;\n  height: 3px;\n  background: #f5df75;\n  border-radius: 1px;\n  opacity: 0;\n  transform: scale(0);\n  transition: opacity 100ms ease, transform 100ms ease;\n}\n\n.matter-btn-inspect:after {\n  left: 31px;\n}\n\n.matter-btn-tools:after {\n  background: #f45f5f;\n  left: 28px;\n}\n\n.matter-btn-fullscreen:after {\n  background: #76f09b;\n  left: 32px;\n}\n\n.matter-is-fullscreen .matter-btn-fullscreen:after,\n.matter-gui-active .matter-btn-tools:after,\n.matter-inspect-active .matter-btn-inspect:after {\n  opacity: 1;\n  transform: scale(1);\n}\n\n.ins-container,\nbody .dg {\n  display: none;\n}\n\n@media screen and (min-width: 500px) {\n  .ins-container,\n  body .dg,\n  .matter-btn-tools,\n  .matter-btn-inspect,\n  .matter-btn-source {\n    display: block;\n  }\n}\n";

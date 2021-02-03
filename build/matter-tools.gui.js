@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.12.3 by @liabru 2021-01-16
+ * matter-tools 0.13.0 by @liabru 2021-02-03
  * https://github.com/liabru/matter-tools
  * License MIT
  * 
@@ -27,14 +27,14 @@
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("matter-js"), require("matter-tools"));
+		module.exports = factory(require("matter-js"), require("matter-tools/src/tools/Serializer"));
 	else if(typeof define === 'function' && define.amd)
-		define("Gui", ["matter-js", "matter-tools"], factory);
+		define("Gui", ["matter-js", "matter-tools/src/tools/Serializer"], factory);
 	else if(typeof exports === 'object')
-		exports["Gui"] = factory(require("matter-js"), require("matter-tools"));
+		exports["Gui"] = factory(require("matter-js"), require("matter-tools/src/tools/Serializer"));
 	else
-		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Gui"] = factory(root["Matter"], root["MatterTools"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE__0__, __WEBPACK_EXTERNAL_MODULE__1__) {
+		root["MatterTools"] = root["MatterTools"] || {}, root["MatterTools"]["Gui"] = factory(root["Matter"], root["MatterTools"]["Serializer"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE__0__, __WEBPACK_EXTERNAL_MODULE__2__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -114,11 +114,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/demo/lib";
+/******/ 	__webpack_require__.p = "/demo/lib/";
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -129,12 +129,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__0__;
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__1__;
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -186,6 +180,12 @@ Common.domInsertBefore = function(element, before) {
 
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__2__;
+
+/***/ }),
 /* 3 */,
 /* 4 */,
 /* 5 */,
@@ -194,7 +194,9 @@ Common.domInsertBefore = function(element, before) {
 /* 8 */,
 /* 9 */,
 /* 10 */,
-/* 11 */
+/* 11 */,
+/* 12 */,
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -205,11 +207,11 @@ Common.domInsertBefore = function(element, before) {
  * @module Gui
  */
 
-var Gui = module.exports = {};
+const Gui = module.exports = {};
 
-const dat = __webpack_require__(12);
-const ToolsCommon = __webpack_require__(2);
-const Serializer = __webpack_require__(1).Serializer;
+const dat = __webpack_require__(14);
+const ToolsCommon = __webpack_require__(1);
+const Serializer = __webpack_require__(2);
 
 const Matter = __webpack_require__(0);
 const Engine = Matter.Engine;
@@ -264,7 +266,7 @@ Gui.create = function(engine, runner, render) {
     gui.serializer = Serializer.create();
   }
 
-  let styles = __webpack_require__(13);
+  let styles = __webpack_require__(15);
   ToolsCommon.injectStyles(styles, 'matter-gui-style');
 
   _initDatGui(gui);
@@ -517,7 +519,7 @@ var _clear = function(gui) {
 */
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -536,7 +538,7 @@ var _clear = function(gui) {
 
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports) {
 
 module.exports = "/*\n*\tMatterTools.Gui\n*/\n\nbody .dg .c,\nbody .dg .cr.function,\nbody .dg .c select,\nbody .dg .property-name,\nbody .dg .title {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\nbody .dg.main {\n  z-index: 10;\n  height: 100%;\n  background: #14151f;\n  position: fixed;\n  top: 0;\n  right: 0;\n  padding: 48px 0 0 0;\n  box-shadow: 0 0 7px rgba(0, 0, 0, 0.1);\n}\n\nbody .dg.main,\nbody .dg.main * {\n  box-sizing: border-box;\n  font-family: \"Helvetica Neue\", Helvetica, Arial, \"Lucida Grande\", sans-serif;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n}\n\nbody .dg.main *:focus,\nbody .dg.main *:active {\n  outline: 0;\n}\n\nbody .dg.main *:-moz-focusring {\n  outline: 3px solid #4da4e4;\n  outline-offset: -1px;\n  z-index: 5;\n}\n\nbody .dg.main *:focus-visible {\n  outline: 3px solid #4da4e4;\n  outline-offset: -1px;\n  z-index: 5;\n}\n\nbody .dg.ac {\n  position: static;\n  top: inherit;\n  left: inherit;\n  bottom: inherit;\n  right: inherit;\n}\n\nbody .dg.main {\n  transform: translate(230px, 0);\n  transition: transform ease;\n  transition-delay: 2000ms;\n  transition-duration: 300ms;\n}\n\nbody .dg.main:hover {\n  transform: translate(0, 0);\n  transition-delay: 0ms;\n  transition-duration: 400ms;\n}\n\n@media only screen and (min-width: 1300px) {\n  body .dg.main,\n  body .dg.main:hover {\n    transition-delay: 0ms;\n    transform: translate(0, 0);\n  }\n}\n\nbody .dg.main .close-button {\n  display: none;\n}\n\nbody .dg.main > ul {\n  height: 100%;\n  background: #191921;\n  overflow-y: auto;\n  scrollbar-color: #0d0f1b #0d0f1b;\n  scrollbar-width: thin;\n}\n\nbody .dg.main > ul:hover {\n  scrollbar-color: #44444e #0d0f1b;\n  scrollbar-width: thin;\n}\n\nbody .dg.main > ul::-webkit-scrollbar {\n  background: #0d0f1b;\n  width: 6px;\n  height: 6px;\n}\n\nbody .dg.main > ul::-webkit-scrollbar-track,\nbody .dg.main > ul::-webkit-scrollbar-corner {\n  background: #0d0f1b;\n}\n\nbody .dg.main > ul::-webkit-scrollbar-thumb {\n  background: #0d0f1b;\n  border-radius: 3px;\n}\n\nbody .dg.main > ul:hover::-webkit-scrollbar-thumb {\n  background: #44444e;\n}\n\nbody .dg {\n  color: #6d6d7d;\n  text-shadow: none !important;\n  font-size: 12px;\n}\n\nbody .dg .closed .cr {\n  display: none;\n}\n\nbody .dg li:not(.folder) {\n  height: 29px;\n  background: #1c1c25;\n  border-bottom: 0px;\n  padding: 0 8px 0 12px;\n}\n\nbody .dg li.save-row .button {\n  text-shadow: none !important;\n}\n\nbody .dg li.title {\n  padding: 2px 0 0 24px;\n  color: #6a6977;\n  background: #0d0f1b\n    url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==)\n    no-repeat;\n  background-position: 12px;\n}\n\nbody .dg li.title:hover {\n  color: #9494a2;\n}\n\nbody .dg .cr.boolean:hover {\n  background: #20212b;\n}\n\nbody .dg .cr.function {\n  background: #262731;\n  color: #636371;\n  border-top: 1px solid #30313c;\n}\n\nbody .dg .cr.function:hover {\n  background: #30313e;\n}\n\nbody .dg .cr.function:active {\n  background: #2d2e3a;\n}\n\nbody .dg .cr.function:active .property-name {\n  transform: translateY(1px);\n}\n\nbody .dg .c,\nbody .dg .property-name {\n  width: 50%;\n}\n\nbody .dg .c select {\n  margin-top: 2px;\n  margin-left: -5px;\n  padding: 3px 5px;\n}\n\nbody .dg .c select,\nbody .dg .c input[type=\"text\"],\nbody .dg .cr.number input[type=\"text\"] {\n  text-align: right;\n  background: transparent;\n  color: #686c7b;\n  border: 0;\n  border-radius: 2px;\n  overflow: hidden;\n  font-size: 11px;\n}\n\nbody .dg .cr.number,\nbody .dg .cr.boolean,\nbody .dg .cr.function {\n  border-left: 0;\n}\n\nbody .dg .c select,\nbody .dg .c select:focus {\n  width: 88px;\n}\n\nbody .dg .c input[type=\"text\"]:hover {\n  background: #2b2c3a;\n}\n\nbody .dg .c input[type=\"text\"]:focus {\n  background: #2b2c3a;\n  color: #fff;\n  outline: none;\n}\n\nbody .dg .c input[type=\"checkbox\"] {\n  margin-top: 10px;\n  border: none;\n  border-radius: 50%;\n  appearance: none;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  background: #35363e;\n  display: block;\n  width: 7px;\n  height: 7px;\n  float: right;\n}\n\nbody .dg .c input[type=\"checkbox\"]:checked {\n  background: #747784;\n}\n\nbody .dg .c .slider {\n  background: #23232d;\n  border-radius: 2px;\n  box-shadow: none;\n  padding: 0;\n  overflow: hidden;\n}\n\nbody .dg .c .slider:hover {\n  background: #282b3a;\n}\n\nbody .dg .c .slider-fg {\n  background: #3f4354;\n  border-radius: 0;\n  margin-left: 0;\n  padding-right: 0;\n}\n\nbody .dg .c .slider-fg:after {\n  display: none;\n}\n\nbody .dg .c .slider:hover .slider-fg {\n  background: #4d526b;\n}\n\nbody .dg li.folder {\n  border-left: 0;\n}\n\nbody .dg.a {\n  margin-right: 0;\n}\n";
