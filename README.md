@@ -23,8 +23,11 @@ You can install using [npm](https://www.npmjs.com/):
 
 ### Bundles
 
-Alternatively the following split bundle builds are provided for convenience:
+Alternatively the following complete bundle is provided for convenience
 
+- [build/matter-tools.js](https://github.com/liabru/matter-tools/blob/master/build)
+
+Individual smaller bundles for each tool are also available
 - [build/matter-tools.demo.js](https://github.com/liabru/matter-tools/blob/master/build)
 - [build/matter-tools.gui.js](https://github.com/liabru/matter-tools/blob/master/build) (bundles [dat.gui](https://github.com/dataarts/dat.gui))
 - [build/matter-tools.inspector.js](https://github.com/liabru/matter-tools/blob/master/build) (bundles [keymaster](https://github.com/madrobby/keymaster), [jquery](https://github.com/jquery/jquery), [jstree](https://github.com/vakata/jstree))
