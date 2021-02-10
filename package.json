@@ -20,10 +20,11 @@
     "rigid body physics"
   ],
   "scripts": {
+    "start": "npm run dev",
     "dev": "webpack-dev-server --open --no-cache --mode development",
-    "dev-mon": "nodemon --watch webpack.config.js ./node_modules/.bin/webpack-dev-server --no-cache --mode development",
-    "build": "webpack --mode=production & webpack --mode=production --env.MINIMIZE",
-    "build-split": "webpack --config webpack.split.config.js --mode=production & webpack --config webpack.split.config.js --mode=production --env.MINIMIZE",
+    "watch": "nodemon --watch webpack.config.js ./node_modules/.bin/webpack-dev-server --no-cache --mode development",
+    "build": "webpack --mode=production --no-hot --no-watch && webpack --mode=production --no-hot --no-watch --env.MINIMIZE",
+    "build-split": "webpack --config webpack.split.config.js --mode=production --no-hot --no-watch && webpack --config webpack.split.config.js --mode=production --no-hot --no-watch --env.MINIMIZE",
     "build-demo": "mkdir -p docs/demo/lib && cp -r build/matter-tools.min.js docs/demo/lib & cp node_modules/matter-js/build/matter.min.js docs/demo/lib",
     "lint": "eslint src/**/*.js",
     "doc": "markdox src/**/*.js -o API.md",
@@ -35,15 +36,16 @@
   },
   "devDependencies": {
     "case": "^1.6.3",
-    "eslint": "^6.8.0",
-    "raw-loader": "^4.0.2",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.11.2",
     "dat.gui": "^0.7.7",
+    "eslint": "^6.8.0",
     "jquery": "^3.5.1",
     "jstree": "^3.3.11",
     "keymaster": "^1.6.2",
-    "matter-js": "^0.16.1"
+    "matter-js": "^0.16.1",
+    "raw-loader": "^4.0.2",
+    "terser-webpack-plugin": "^4.2.3",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.2"
   }
 }
