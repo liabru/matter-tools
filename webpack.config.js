@@ -52,7 +52,16 @@ License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
     node: false,
     optimization: { 
       minimize,
-      minimizer: [new TerserPlugin({ extractComments: false })]
+      minimizer: [
+        new TerserPlugin({ 
+          extractComments: false,
+          terserOptions: {
+            output: {
+              comments: /license|copyright|\(c\)/ig,
+            },
+          }
+        })
+      ]
     },
     performance: {
       maxEntrypointSize: maxSize,

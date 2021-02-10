@@ -6,6 +6,7 @@ const pkg = require('./package.json');
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 const Case = require('case');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = (env = {}) => {
   const minimize = env.MINIMIZE || false;
@@ -14,12 +15,11 @@ module.exports = (env = {}) => {
   const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
   const version = !alpha ? pkg.version : `${pkg.version}-alpha+${commitHash}`;
   const license = fs.readFileSync('LICENSE', 'utf8');
-  const date = new Date().toISOString().slice(0, 10);
   const name = pkg.name;
   const alphaInfo = 'Experimental pre-release build.\n  ';
   
   const banner = 
-`${pkg.name} ${version} by @liabru ${date}
+`${pkg.name} ${version} by @liabru
 ${alpha ? alphaInfo : ''}${pkg.homepage}
 License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
 
@@ -55,7 +55,19 @@ License ${pkg.license}${!minimize ? '\n\n' + license : ''}`;
       ]
     },
     node: false,
-    optimization: { minimize },
+    optimization: { 
+      minimize,
+      minimizer: [
+        new TerserPlugin({ 
+          extractComments: false,
+          terserOptions: {
+            output: {
+              comments: /license|copyright|\(c\)/ig,
+            },
+          }
+        })
+      ]
+    },
     performance: {
       maxEntrypointSize: maxSize,
       maxAssetSize: maxSize
