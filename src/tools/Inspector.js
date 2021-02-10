@@ -47,8 +47,10 @@ Inspector.create = function(engine, render, options) {
     selectBounds: Bounds.create(),
     mousePrevPosition: { x: 0, y: 0 },
     offset: { x: 0, y: 0 },
+    autoExpand: true,
     autoHide: true,
     autoRewind: true,
+    hasExpanded: false,
     bodyClass: '',
     exportIndent: 0,
     clipboard: [],
@@ -352,6 +354,16 @@ var _initTree = function(inspector) {
 
   controls.worldTree = $('<div class="ins-world-tree">').jstree(worldTreeOptions);
   controls.container.append(controls.worldTree);
+
+  inspector.hasExpanded = false;
+
+  controls.worldTree.on('refresh.jstree', function() {
+    // expand tree on first update
+    if (inspector.autoExpand && !inspector.hasExpanded) {
+      inspector.hasExpanded = true;
+      controls.worldTree.jstree('open_all');
+    }
+  });
 
   controls.worldTree.on('changed.jstree', function(event, data) {
     var selected = [],
