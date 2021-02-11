@@ -1,5 +1,5 @@
 /*!
- * matter-tools 0.13.0 by @liabru 2021-02-03
+ * matter-tools 0.14.0 by @liabru
  * https://github.com/liabru/matter-tools
  * License MIT
  * 
@@ -248,8 +248,10 @@ Inspector.create = function(engine, render, options) {
     selectBounds: Bounds.create(),
     mousePrevPosition: { x: 0, y: 0 },
     offset: { x: 0, y: 0 },
+    autoExpand: true,
     autoHide: true,
     autoRewind: true,
+    hasExpanded: false,
     bodyClass: '',
     exportIndent: 0,
     clipboard: [],
@@ -553,6 +555,16 @@ var _initTree = function(inspector) {
 
   controls.worldTree = $('<div class="ins-world-tree">').jstree(worldTreeOptions);
   controls.container.append(controls.worldTree);
+
+  inspector.hasExpanded = false;
+
+  controls.worldTree.on('refresh.jstree', function() {
+    // expand tree on first update
+    if (inspector.autoExpand && !inspector.hasExpanded) {
+      inspector.hasExpanded = true;
+      controls.worldTree.jstree('open_all');
+    }
+  });
 
   controls.worldTree.on('changed.jstree', function(event, data) {
     var selected = [],
